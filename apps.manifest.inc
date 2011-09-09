@@ -224,8 +224,15 @@ function apps_request_manifest_image_process(&$manifest) {
  *
  */
 function apps_retrieve_app_image($url, $title = FALSE, $alt = FALSE) {
+  //allow for local files from the development server type
+  $check = parse_url($url);
+  if(!$check || !isset($check['host']) || !$check['host']){
+    $url = url($url, array('absolute'=>TRUE));
+  }
+  
   //to prevent strict warning need to store this in a variable
   $url_parts = explode("/", parse_url($url, PHP_URL_PATH));
+  
   $file_name = array_pop($url_parts);
   
   $uri = file_build_uri("apps/$file_name");
@@ -255,7 +262,7 @@ function apps_retrieve_app_image($url, $title = FALSE, $alt = FALSE) {
   }
    
   $request = drupal_http_request($url, array(), 'GET');
-  
+
   if (isset($request->data)) {
     if (!file_exists(drupal_realpath(file_build_uri('apps')))) {
       drupal_mkdir(file_build_uri('apps'));
@@ -362,6 +369,7 @@ function apps_add_app_info(&$apps) {
   if ($info_cache) {
     $info = $info_cache->data();
   }
+  $set_cache = FALSE;
   foreach($apps as $id => $app) {
     if(!isset($info[$app['machine_name']])) {
        $info[$app['machine_name']] = ($i = module_invoke($app['machine_name'], 'apps_app_info')) ? $i : array();
