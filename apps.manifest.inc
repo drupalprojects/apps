@@ -43,8 +43,12 @@ function apps_servers($server_name = FALSE) {
   $servers = $servers_cache ? $servers_cache->data : FALSE;
   if (!$servers) {
     $profile = drupal_get_profile();
+    // Get apps servers from profile
     $servers = ($s = module_invoke($profile, 'apps_servers_info')) ? $s : array();
-    
+    // Allow modules to add apps servers as well.
+    $servers += module_invoke_all('apps_servers_info');
+
+    drupal_alter('apps_servers', $servers);
 
     foreach($servers as $name =>$server) {
       $servers[$name]['name'] = $name;
