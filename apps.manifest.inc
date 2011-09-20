@@ -320,6 +320,10 @@ function apps_manifest($server) {
           //if any one module is incompatable then the app is incompatable
           $app['incompatable'] = TRUE;
         }
+        if($status == INSTALLABLE) {
+          //if any one module is installable then we are not installed yet
+          $app['installed'] = FALSE;
+        }
         //rebuild dep with new data
         $info = array(
           'downloadable' => $downloadable,
