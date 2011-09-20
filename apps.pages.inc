@@ -245,7 +245,7 @@ function apps_app_uninstall($server_name, $app_name) {
   $next = apps_app_page_path($app, 'configure');
   require_once DRUPAL_ROOT . '/includes/install.inc';
   $uninstall[] = $app['machine_name'];
-  if ($app['demo content module']) {
+  if (isset($app['demo content module']) && $app['demo content module']) {
     array_unshift($uninstall, $app['demo content module']);
   }
   $success = drupal_uninstall_modules($uninstall);
