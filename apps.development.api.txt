@@ -1,0 +1,65 @@
+Developing an App
+
+The Apps module provides a way to locally develop and test apps.
+This document discuss how to do that.
+
+Enable the development console from the Apps Configuration page located at admin/config/system/apps
+
+Reference the manifest from the module.info and make sure the server is development:
+apps[server] = development
+apps[manifests][] = app/manifest.app
+
+and place your manifest and images in a subfolder of the module
+  app/
+    manifest.app
+    screenshot.jpg
+    screenshot2.jpg
+    logo.png
+
+The manifest.app should be an ini file with the following items
+  name = Test App
+  description = Test App is used to show how apps work
+  machine_name = test_app
+  version = 1.0
+  downloadable = test_app 1.0
+  author = Phase2 Techonology
+  author_url = http://www.phase2technology.com
+  screenshots[] = screenshot.jpg
+  screenshots[] = screenshot2.jpg
+  logo = logo.png
+  dependencies[views] = views 3.0-beta3
+  dependencies[ctools] = ctools 1.0-alpha4
+  libraries[arc] = arc
+  downloadables[arc] = http://github.com/semsol/arc2/zipball/v2.0.0
+  downloadables[views 3.0-beta3] = http://ftp.drupal.org/files/projects/views-7.x-3.0-beta3.tar.gz
+  downloadables[ctools 1.0-alpha4] = http://ftp.drupal.org/files/projects/ctools-7.x-1.0-alpha4.tar.gz
+  downloadables[test_app 1.0] = http://ftp.drupal.org/files/projects/test_app-7.x-1.0.tar.gz
+
+Descriptions 
+
+  Name of the App: example: Project Mapper
+  
+  Description that tells what it does and who its for, for the apps listing in the OpenPublic apps server.
+      Example: "Open Public's Project Mapper is a great way to present your work on a beautiful map. It provides you with a landing page that shows your projects as pins on a map and as a grid of image thumbnails giving your users a quick way to get an overview of your activities. Each project has its own page for publishing detailed information. You can create new projects by simply logging on to your Open Public Site and filling-out a web form.",
+  
+  Machine name: name of the main module
+  
+  Version: which version of the app this is. e.g. 1.0-beta1
+  
+  Location: where the main module is found. e.g. http://drupal.org/files/projects/openpublic_projects _7.x-1.0-alpha3.tar.gz
+  
+  Author: who created this app; e.g. Development Seed
+  
+  Author URL: link to the author’s site; e.g http://www.developmentseed.org
+  
+  Screenshots: an array of screen shot relative to the path of the manifest.app
+      A list of screen shots that will show up in app interface. e.g. http://appserver.openpublicapp.com/sites/default/files/apps/project-mapper-screenshot1.jpg
+  
+  Logo: a logo or icon for the app itself; this path should be relative to the manifest.app path
+  
+  Dependencies: please list all the modules that need to be installed for the App to work; and any modules that those modules depend on. The key is the name of the module, and the value is the name of the downloadable of which it is a part
+  
+  Libraries: specify required libraries and reference the keys in downloadables
+  
+  Downloadables: please list all downloadables and the location from which they can be downloaded. Downloadables keys are referenced from the dependencies. You should also list your app module here so it can be downloaded.
+
