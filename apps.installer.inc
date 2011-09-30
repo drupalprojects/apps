@@ -18,7 +18,9 @@ function apps_download_apps($app) {
     }
   }
   // add our core modules download
-  $downloads[$app['downloadable']]['for'][] = $app['machine_name'];
+  if(!$app['installed']) {
+    $downloads[$app['downloadable']]['for'][] = $app['machine_name'];
+  }
   //foreach download find the url
   foreach($downloads as $key => $download) {
     $downloads[$key]['url'] = $app['downloadables'][$key];

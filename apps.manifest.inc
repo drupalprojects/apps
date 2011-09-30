@@ -314,6 +314,7 @@ function apps_manifest($server) {
       $app['enabled'] = $current_app_module && $current_app_module->status;
       $app['incompatable'] = FALSE;
       $app['installed'] = (bool) $current_app_module;
+      $app['dep_installed'] = TRUE;
       $app['disabled'] = $current_app_module && empty($current_app_module->status) && $current_app_module->schema_version > SCHEMA_UNINSTALLED;
       $app['featured'] = ($app['machine_name'] == $manifest['featured app']);
       $app['server'] = $server;
@@ -336,7 +337,7 @@ function apps_manifest($server) {
         }
         if($status == INSTALLABLE) {
           //if any one module is installable then we are not installed yet
-          $app['installed'] = FALSE;
+          $app['dep_installed'] = FALSE;
         }
         //rebuild dep with new data
         $info = array(
@@ -363,7 +364,7 @@ function apps_manifest($server) {
           $app['dependencies'][$name_version] = $info;
         }
       }
-      $app['status'] = $app['incompatable'] ? INCOMPATABLE : (!$app['installed'] ? INSTALLABLE : ($app['enabled'] ? ENABLED : DISABLED));
+      $app['status'] = $app['incompatable'] ? INCOMPATABLE : (!$app['installed'] || !$app['dep_installed'] ? INSTALLABLE : ($app['enabled'] ? ENABLED : DISABLED));
       $apps[$app['machine_name']] = $app;
       
     }
