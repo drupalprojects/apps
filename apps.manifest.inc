@@ -318,6 +318,7 @@ function apps_manifest($server) {
       $app['disabled'] = $current_app_module && empty($current_app_module->status) && $current_app_module->schema_version > SCHEMA_UNINSTALLED;
       $app['featured'] = ($app['machine_name'] == $manifest['featured app']);
       $app['server'] = $server;
+      $app['dependencies'] = isset($app['dependencies']) ? $app['dependencies'] : array();
       // Add info to dependencies
       foreach($app['dependencies'] as $name_version => $downloadable) {
         //Parse dep versions
