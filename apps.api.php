@@ -21,12 +21,12 @@ function hook_apps_app_info() {
 
     //If the demo content is provide in a differnt way one should provide the
     //following callbacks
-    'demo content enabled' => 'appname_demo_content_enabled' //should return True if demo content is on
-    'demo content enable' => 'appname_demo_content_enable' //should turn on demo content and return true
-    'demo content disable' => 'appname_demo_content_disable' //should turn off demo content and return true
+    'demo content enabled' => 'appname_demo_content_enabled', //should return True if demo content is on
+    'demo content enable' => 'appname_demo_content_enable', //should turn on demo content and return true
+    'demo content disable' => 'appname_demo_content_disable', //should turn off demo content and return true
 
-    'configure form' => 'appname_app_configure_form' // This form will be render on the app config page
-    'post install callback' => 'appname_app_post_install' // This will be called after the app is enabled intialy or of the app has been uninstalled
+    'configure form' => 'appname_app_configure_form', // This form will be render on the app config page
+    'post install callback' => 'appname_app_post_install', // This will be called after the app is enabled intialy or of the app has been uninstalled
   );
 }
 
