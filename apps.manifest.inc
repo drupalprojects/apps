@@ -298,9 +298,9 @@ function apps_retrieve_app_image($url, $title = FALSE, $alt = FALSE) {
  *TODO: Cache status data and clear on changes to any module status
  */
 function apps_manifest($server) {
-  $manifest = &drupal_static(__function__);
+  $manifests = &drupal_static(__function__);
   require_once DRUPAL_ROOT . '/includes/install.inc';
-  if (!$manifest && !isset($manifest['error'])) {
+  if (!$manifests[$server['name']] && !isset($manifests[$server['name']]['error'])) {
     // Get manifest from server
     $manifest = apps_request_manifest($server);
     //if there is an error with the manifest jump out now
@@ -372,8 +372,9 @@ function apps_manifest($server) {
     //overide json apps with our inhanced apps
     apps_add_app_info($apps);
     $manifest['apps'] = $apps;
+    $manifests[$server['name']] = $manifest;
   }
-  return $manifest;
+  return $manifests[$server['name']];
 }
 
 function apps_add_app_info(&$apps) {
