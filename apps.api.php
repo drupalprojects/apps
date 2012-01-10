@@ -27,7 +27,24 @@ function hook_apps_app_info() {
 
     'configure form' => 'appname_app_configure_form', // This form will be render on the app config page
     'post install callback' => 'appname_app_post_install', // This will be called after the app is enabled intialy or of the app has been uninstalled
-  );
+    'status callback' => 'appname_app_status'
+    /*
+    This call back is used to render a status table on the config page.  it should be an array with two keys (and on optional third) 
+    array(
+      'title' =>'Status'  //title of the table,
+      'items' => array(  //rows in the table with any keys
+        array(
+          'severity' =>    REQUIREMENT_WARNING, //REQUIREMENT_OK REQUIREMENT_INFO, REQUIREMENT_ERROR
+          'title' => 'Example',
+          'description' => t("Instrunctions for Example"),
+          'action' => array(l("Link to do something!", "")),
+        ),
+      ),
+      // headers are optional but these are the default
+      'headers' => array('severity', 'title', 'description', 'action')
+    );
+    serverity and 
+    */
 }
 
 
