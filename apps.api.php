@@ -78,34 +78,41 @@ $js = <<<JS
   "featured app": "ideation",
   "manifest version": 1.0,
   "apps": [
+    // This starts a single app manifest
     {
-      "name": "Ideation", // The Title of the app
-      "description": "You think it, we log it", // Description of what the app will do
-      "version" : "1.0-alpha", //current version 
-      "author" : "Phase2 Technology", //who create the app
-      "author_url" : "http://www.phase2technology.com", //url of the creates site
-      // an array of screen shots for display on the detailed page
+      // The Title of the app
+      "name": "Ideation",
+      // Description of what the app will do
+      "description": "You think it, we log it",
+      // The current version of the app
+      "version" : "1.0-alpha",
+      // Who created the app
+      "author" : "Phase2 Technology",
+      // Url of the creates site
+     "author_url" : "http://www.phase2technology.com",
+      // An array of screen shots for display on the detailed page
       "screenshots" : ["http://appserver.openpublicapp.com/sites/default/files/ideation-screenshot1.jpg"],
-      // the logo image for the app
+      // The logo image for the app
       "logo" : "http://drupal.org/files/images/ideation.jpg",
-      //the machine_name of the main module
+      // The machine_name of the main module
       "machine_name" : "ideation",
-      //the key from the downloadables array for where to get the main module
+      // The key from the downloadables array for where to get the main module
       "downloadable" : "ideation 7.x",
-      //a hash of depend modules where the key is the name of the module (one can include version req) and the value
-      //is the key of the downloadable for that module
-      //Note the whole dep tree must be listed including deps of deps
+      // A hash of dependant modules. The key is the machine name of the module. The value is the module
+      // and a version specification. This uses the .info format for module dependencies.  The values in
+      // this hash are the keys used in the downloadables hash later in the manifest.
       "dependencies": {
         "views": "views 7.x-1.0",
         "votingapi": "votingapi 7.x-2.4",
         "fivestar": "fivestar 6.x-2.x-dev"
       },
-      //Libraries will be installed to sites/all/libraries/KEY
+      // Libraries will be installed to sites/all/libraries/{key}. The values in this hash are the
+      // keys used in the downloadables hash later in the manifest.
       "libraries": {
         "jquery_ideation": "jquery_ideation 1.0"
       }
-      //a hash of downloadables the key is use else where in the manifest and the value should be a url
-      //to a compress file (tar gz zip)
+      // A hash of resources to be downloaded. The key is used else where in the manifest. The value
+      // should be a url to a publicly downloadable archive (tar gz zip)
       "downloadables": {
         "ideation 7.x" : "http://appserver.openpublicapp.com/sites/default/files/fserver/ideation-7.x.tgz",
         "jquery_ideation 1.0" : "http://appserver.openpublicapp.com/sites/default/files/fserver/jquery_ideation-1.0.tgz",
@@ -114,6 +121,7 @@ $js = <<<JS
         "votingapi 7.x-2.4" : "http://ftp.drupal.org/files/projects/votingapi-7.x-2.4.tar.gz"
       }
     }
+    // This ends a single app manifest
   ]
 }
 
