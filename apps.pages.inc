@@ -170,10 +170,6 @@ function apps_app_install($server_name, $app_name) {
   $action = arg(APPSERVER_BASEPATH_DEPTH + 5);
   $apps = apps_apps($server_name , array('machine_name' => $app_name)) ;
   $app = $apps[$app_name];
-  if (!is_writeable(conf_path())) {
-      drupal_set_message("To install an app, web server needs write access to the Drupal sites folder. Please adjust and try again.", 'error');
-      drupal_goto(apps_app_page_path($app));
-  }
   switch ($action) {
     case FALSE:
       $next = apps_app_page_path($app, 'install/install');

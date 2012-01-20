@@ -158,13 +158,12 @@ function apps_install_downloads() {
     // credentials and invoke update_authorize_run_update() indirectly with
     // whatever FileTransfer object authorize.php creates for us.
     else {
-      drupal_set_message("For the App Store to install apps, the web server needs access to the drupal sites dir", 'error');
+      // Set the $_SESSION variables so that authorize form knows what to do after authorization.
       system_authorized_init('apps_run_install', drupal_get_path('module', 'apps') . '/apps.installer.inc', array($updates), t('Update manager'));
       require_once DRUPAL_ROOT . '/includes/authorize.inc';
+      // Get the authorize form.
       $form = drupal_get_form('authorize_filetransfer_form');
-      array_unshift($form['#submit'], 'apps_authorize_filetransfer_form_submit');
-      //unset($_SESSION['update_manager_update_projects']);
-      //return $form;
+      return $form;
     }
   }
 }
