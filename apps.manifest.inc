@@ -393,7 +393,7 @@ function apps_add_app_info(&$apps) {
     //add defaults
     $info_defaults = array(
       'configure form' => $app['machine_name'] . "_apps_app_configure_form",
-      'demo content description' => "Enabling the demo content will add content to the site that should help to understand how the app functions.  When it is disable all of that content will be removed.",
+      'demo content description' => "Enabling the demo content will add content to the site that can help to understand how the app functions.  When it is disabled all of the demo content will be removed.",
     );
     $apps[$id] += $info_defaults;
     
@@ -469,7 +469,7 @@ function apps_demo_content_form($form, &$form_state, $app) {
     '#title' => "Demo Content for {$app['name']}",
   );
   $form['demo_content_group']['demo_content_current'] = array(
-    '#markup' => $app['demo content description']. " <i>Demo content for {$app['name']} is currently " . ($enabled ? 'enabled' : 'disable') . ".</i><br /><br />",
+    '#markup' => $app['demo content description']. " <i>Demo content for {$app['name']} is currently " . ($enabled ? 'enabled' : 'disabled') . ".</i><br /><br />",
   );
   $form['demo_content_action'] = array(
     '#type' => 'value',
