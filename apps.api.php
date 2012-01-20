@@ -64,6 +64,18 @@ function hook_apps_servers_info() {
   );
 }
 
+/**
+ * Add an apps install step to an installation profile.
+ * 
+ * Use this in your hook_install_tasks to add all the needed tasks for installing
+ * apps. Set the App Server key and any default selected apps.
+ */
+function hook_install_tasks($install_state) {
+  require_once(drupal_get_path('module', 'apps') . '/apps.profile.inc');
+  $tasks = array();
+  $tasks = $tasks + apps_profile_install_tasks(&$install_state, 'APP_SERVER_NAME', array('default_app1', 'default_app2'));
+  return $tasks;
+}
 
 /**
  * This is the struture of the json manifest
