@@ -10,43 +10,54 @@
  *
  */
 function apps_download_apps($app) {
-  $downloads = array();
-  // find all downloads needed for dependencies
-  foreach($app['dependencies'] as $dep) {
-    if(!$dep['installed']) {
-      $downloads[$dep['downloadable']]['for'][] = $dep['version']['name'];
+  $download_batch = apps_download_apps_batch(array($app));
+  batch_set($download_batch);
+  batch_process($_SESSION['apps_install_next']);
+}
+
+/** 
+ * Make the batch for downloading modules for app.
+ * 
+ * Split out for use in apps.profile.inc
+ */
+function apps_download_apps_batch($apps) {
+  $download_commands = array();
+  foreach ($apps as $app) {
+    $downloads = array();
+    // find all downloads needed for dependencies
+    foreach($app['dependencies'] as $dep) {
+      if(!$dep['installed']) {
+        $downloads[$dep['downloadable']]['for'][] = $dep['version']['name'];
+      }
+    }
+    // add our core modules download
+    if(!$app['installed']) {
+      $downloads[$app['downloadable']]['for'][] = $app['machine_name'];
+    }
+    //foreach download find the url
+    foreach($downloads as $key => $download) {
+      $downloads[$key]['url'] = $app['downloadables'][$key];
+      // do a quick dirty pull of the name from the key
+      $downloads[$key]['name'] = ($e = strpos($key, " ")) ? substr($key, 0, $e) : $key;
+    }
+    foreach($downloads as $download) {
+      $download_commands[] = array(
+        'apps_download_batch',
+        array(
+          $download['name'],
+          $download['url']
+        ),
+      );
     }
   }
-  // add our core modules download
-  if(!$app['installed']) {
-    $downloads[$app['downloadable']]['for'][] = $app['machine_name'];
-  }
-  //foreach download find the url
-  foreach($downloads as $key => $download) {
-    $downloads[$key]['url'] = $app['downloadables'][$key];
-    // do a quick dirty pull of the name from the key 
-    $downloads[$key]['name'] = ($e = strpos($key, " ")) ? substr($key, 0, $e) : $key;
-  }
-  $download_commands = array();
-  $install_commands = array();
-  foreach($downloads as $download) {
-    $download_commands[] = array(
-      'apps_download_batch',
-      array(
-        $download['name'],
-        $download['url']
-      ),
-    );
-  }
-  $download_batch = array(
+  $batch = array(
     'operations' => $download_commands,
     'file' => drupal_get_path('module', 'apps') . '/apps.installer.inc',
     'title' => t('Downloading modules'),
     'init_message' => t('Preparing to download needed modules'),
     'finished' => 'apps_download_batch_finished',
   );
-  batch_set($download_batch);
-  batch_process($_SESSION['apps_install_next']);
+  return $batch;
 }
 
 /**
