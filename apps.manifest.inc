@@ -362,7 +362,7 @@ function apps_manifest($server) {
             'enabled' => 0,
             'installed' =>  is_dir(DRUPAL_ROOT . "/sites/all/libraries/$name_version"),
           );
-          $app['dependencies'][$name_version] = $info;
+          $app['libraries'][$name_version] = $info;
         }
       }
       $app['status'] = $app['incompatable'] ? INCOMPATABLE : (!$app['installed'] || !$app['dep_installed'] ? INSTALLABLE : ($app['enabled'] ? ENABLED : DISABLED));

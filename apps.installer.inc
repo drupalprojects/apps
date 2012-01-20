@@ -15,11 +15,19 @@ function apps_download_apps($app) {
   foreach($app['dependencies'] as $dep) {
     if(!$dep['installed']) {
       $downloads[$dep['downloadable']]['for'][] = $dep['version']['name'];
+      $downloads[$dep['downloadable']]['type'] = 'module';
+    }
+  }
+  foreach($app['libraries'] as $lib) {
+    if(!$lib['installed']) {
+      $downloads[$lib['downloadable']]['for'][] = $lib['version']['name'];
+      $downloads[$lib['downloadable']]['type'] = 'library';
     }
   }
   // add our core modules download
   if(!$app['installed']) {
     $downloads[$app['downloadable']]['for'][] = $app['machine_name'];
+    $downloads[$app['downloadable']]['type'] = 'app';
   }
   //foreach download find the url
   foreach($downloads as $key => $download) {
@@ -34,7 +42,8 @@ function apps_download_apps($app) {
       'apps_download_batch',
       array(
         $download['name'],
-        $download['url']
+        $download['url'],
+        $download['type']
       ),
     );
   }
@@ -67,7 +76,7 @@ function apps_download_batch_finished($success, $results) {
  * we need this becuase in a batch set the file param is for bouth the operations as well
  * as the other callbackes
  */
-function apps_download_batch($project, $url, &$context) {
+function apps_download_batch($project, $url, $type, &$context) {
   //$args = func_get_args();
   module_load_include("inc", "update", "update.manager");
   //return call_user_func_array('update_manager_batch_project_get', $args);
@@ -87,7 +96,7 @@ function apps_download_batch($project, $url, &$context) {
   }
 
   // Extract it.
-  $extract_directory = _update_manager_extract_directory();
+  $extract_directory = apps_extract_directory($type);
   try {
     update_manager_archive_extract($local_cache, $extract_directory);
   }
@@ -109,8 +118,26 @@ function apps_download_batch($project, $url, &$context) {
   }
 
   // Yay, success.
-  $context['results']['projects'][$project] = $url;
+  $context['results']['projects'][$type][$project] = $url;
   $context['finished'] = 1;
+}
+
+/**
+ * Wrapper for _update_manager_extract_directory()
+ * 
+ * Since libraries and modules can live in the same location, we need to 
+ * namespace the types so they don't collide like the colorbox module.
+ */
+function apps_extract_directory($type = '') {
+  $directory = _update_manager_extract_directory();
+  if ($type) {
+    $directory .= '/' . $type;
+    if (!file_exists($directory)) {
+      mkdir($directory);
+    }
+  }
+  return $directory;
+
 }
 
 /**
@@ -128,18 +155,19 @@ function apps_install_downloads() {
     drupal_get_updaters();
 
     $updates = array();
-    $directory = _update_manager_extract_directory();
-
-    $projects = $_SESSION['update_manager_update_projects'];
-    foreach ($projects as $project => $url) {
-      $project_location = $directory . '/' . $project;
-      $updater = Updater::factory($project_location);
-      $project_real_location = drupal_realpath($project_location);
-      $updates[] = array(
-        'project' => $project,
-        'updater_name' => get_class($updater),
-        'local_url' => $project_real_location,
-      );
+    $project_types = $_SESSION['update_manager_update_projects'];
+    foreach($project_types as $type => $projects) {
+      $directory = apps_extract_directory($type);
+      foreach ($projects as $project => $url) {
+        $project_location = $directory . '/' . $project;
+        $updater = Updater::factory($project_location);
+        $project_real_location = drupal_realpath($project_location);
+        $updates[] = array(
+          'project' => $project,
+          'updater_name' => get_class($updater),
+          'local_url' => $project_real_location,
+        );
+      }
     }
 
     // If the owner of the last directory we extracted is the same as the
