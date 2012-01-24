@@ -319,6 +319,7 @@ function apps_manifest($server) {
       $app['featured'] = ($app['machine_name'] == $manifest['featured app']);
       $app['server'] = $server;
       $app['dependencies'] = isset($app['dependencies']) ? $app['dependencies'] : array();
+      $app['libraries'] = isset($app['libraries']) ? $app['libraries'] : array();
       // Add info to dependencies
       foreach($app['dependencies'] as $name_version => $downloadable) {
         //Parse dep versions

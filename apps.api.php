@@ -73,7 +73,7 @@ function hook_apps_servers_info() {
 function hook_install_tasks($install_state) {
   require_once(drupal_get_path('module', 'apps') . '/apps.profile.inc');
   $tasks = array();
-  $tasks = $tasks + apps_profile_install_tasks(&$install_state, 'APP_SERVER_NAME', array('default_app1', 'default_app2'));
+  $tasks = $tasks + apps_profile_install_tasks($install_state, 'APP_SERVER_NAME', array('default_app1', 'default_app2'));
   return $tasks;
 }
 

@@ -1,15 +1,13 @@
 <?php
+/**
+ * This file handles all the functions for downloading, transferring and 
+ * installing apps during the install process.
+ */
 
 /**
  * Add install tasks to profile install tasks.
  * 
- * Use like:
- * function hook_install_tasks($install_state) {
- *   require_once(drupal_get_path('module', 'apps') . '/apps.profile.inc');
- *   $tasks = array();
- *   $tasks = $tasks + apps_profile_install_tasks(&$install_state, 'APP_SERVER_NAME', array('default_app1', 'default_app2'));
- *   return $tasks;
- * }
+ * See apps.api.php for use.
  *
  */
 function apps_profile_install_tasks($install_state, $apps_server, $default_apps = array()) {
@@ -52,11 +50,6 @@ function apps_profile_install_tasks($install_state, $apps_server, $default_apps 
   }
   return $tasks;
 }
-
-/**
- * This file handles all the functions for downloading, transferring and 
- * installing apps during the install process.
- */
 
 /**
  * Apps install form
@@ -209,18 +202,19 @@ function apps_profile_install_app_modules(&$install_state) {
     drupal_get_updaters();
 
     $updates = array();
-    $directory = _update_manager_extract_directory();
-
-    $projects = $_SESSION['update_manager_update_projects'];
-    foreach ($projects as $project => $url) {
-      $project_location = $directory . '/' . $project;
-      $updater = Updater::factory($project_location);
-      $project_real_location = drupal_realpath($project_location);
-      $updates[] = array(
-        'project' => $project,
-        'updater_name' => get_class($updater),
-        'local_url' => $project_real_location,
-      );
+    $project_types = $_SESSION['update_manager_update_projects'];
+    foreach($project_types as $type => $projects) {
+      $directory = apps_extract_directory($type);
+      foreach ($projects as $project => $url) {
+        $project_location = $directory . '/' . $project;
+        $updater = Updater::factory($project_location);
+        $project_real_location = drupal_realpath($project_location);
+        $updates[] = array(
+          'project' => $project,
+          'updater_name' => get_class($updater),
+          'local_url' => $project_real_location,
+        );
+      }
     }
     
     if (isset($_SESSION['filetransfer'])) {
