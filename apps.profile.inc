@@ -268,13 +268,20 @@ function apps_profile_install_app_modules(&$install_state) {
  */
 function apps_profile_enable_app_modules(&$install_state) {
   $modules = array_keys($_SESSION['apps']);
+  foreach($modules as $id => $module) {
+    if (!apps_profile_check_dependencies(array($module => $module))) {
+      // Something went wrong. Remove from queue and add error.
+      unset($modules[$id]);
+      drupal_set_message(t('There was an error installing @module.', array('@module' => $module)), 'error');
+    }
+  }
   if ($_SESSION['apps_default_content']) {
     $modules[] = 'enterprise_content';
     $files = system_rebuild_module_data();
-    foreach($_SESSION['apps'] as $app) {
+    foreach($modules as $module) {
       // Should probably check the app to see the proper way to do this.
-      if (isset($files[$app . '_content'])) {
-        $modules[] = $app . '_content';
+      if (isset($files[$modules . '_content'])) {
+        $modules[] = $modules . '_content';
       }
     }
   }
@@ -289,3 +296,39 @@ function apps_profile_enable_app_modules(&$install_state) {
   unset($_SESSION['apps_manifest']);
 }
 
+/**
+ * Function to check and make sure all dependencies are available. This will stop stray apps
+ * or broken downloads from stopping the install process for everything.
+ * 
+ * Copied from module_enable() in module.inc
+ */
+function apps_profile_check_dependencies($module_list) {
+  // Get all module data so we can find dependencies and sort.
+  $module_data = system_rebuild_module_data();
+  // Create an associative array with weights as values.
+  $module_list = array_flip(array_values($module_list));
+
+  while (list($module) = each($module_list)) {
+    if (!isset($module_data[$module])) {
+      // This module is not found in the filesystem, abort.
+      return FALSE;
+    }
+    if ($module_data[$module]->status) {
+      // Skip already enabled modules.
+      unset($module_list[$module]);
+      continue;
+    }
+    $module_list[$module] = $module_data[$module]->sort;
+
+    // Add dependencies to the list, with a placeholder weight.
+    // The new modules will be processed as the while loop continues.
+    foreach (array_keys($module_data[$module]->requires) as $dependency) {
+      if (!isset($module_list[$dependency])) {
+        $module_list[$dependency] = 0;
+      }
+    }
+  }
+  
+  // If we make it this far then everything is good.
+  return TRUE;
+}
