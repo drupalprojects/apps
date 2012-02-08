@@ -58,7 +58,21 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
   drupal_set_title(t('Install Apps'));
   // Get and cache the apps manifest file.
   apps_include('manifest');
-  $_SESSION['apps_manifest'] = apps_apps($_SESSION['apps_server']);
+
+  // If there is no internet things get in an unfixable state. Use try->catch
+  try {
+    $_SESSION['apps_manifest'] = apps_apps($_SESSION['apps_server']);
+  }
+  catch (Exception $e) {
+    $form['info'] = array(
+      '#markup' => t('<h2>Error</h2><p>Unable to connect to Apps Server.</p><p>Click "Continue" to finish the installation. You can either fix your internet connection and try the installation again or install apps later from the apps config page.</p>'),
+    );
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Continue'),
+    );
+    return $form;
+  }
 
   // Set a message if no manifest received.
   if (!isset($_SESSION['apps_manifest'])) {
