@@ -130,7 +130,6 @@ function apps_profile_apps_select_form_submit($form, &$form_state) {
  */
 function apps_profile_download_app_modules(&$install_state) {
   apps_include('installer');
-  $apps = $_SESSION['apps'];
   foreach ($_SESSION['apps'] as $id => $name) {
     $apps[] = $_SESSION['apps_manifest'][$name];
   }
