@@ -141,34 +141,43 @@ body .path-admin-apps span.icon {
 }
 
 .app-rating {
-  background: transparent url('../images/stars.png') no-repeat -3px 0 ;
-  padding-left: 100px;
   padding-top: 2px;
   color: #666;
   font-family: "Lucida Grande", Arial, Helvetica, sans-serif;
   font-size: 10px;
   text-transform: uppercase;
-  min-width: 100px;
 }
 
-.app-rating.five {
-  background: transparent url('../images/stars.png') no-repeat -3px 0 ;
+.app-rating .no-vote {
+  display: none;
 }
 
-.app-rating.four{
-  background: transparent url('../images/stars.png') no-repeat -19px 0 ;
+.app-rating .app-user-rating {
+  clear:left;
 }
 
-.app-rating.three{
-  background: transparent url('../images/stars.png') no-repeat -40px 0 ;
+.app-stars-holder {
+  position: relative;
+  width:100px;
+  display:inline-block;
+  height:23px;
+  padding:0;
+  background: transparent url('../images/stars-grey.png') no-repeat;
+  float:left;
 }
 
-.app-rating.two{
-  background: transparent url('../images/stars.png') no-repeat -57px 0 ;
+.app-stars {
+  background: transparent url('../images/stars.png') no-repeat;
+  position: relative;
+  height:23px;
+  padding:0;
+  display:block;
+  overflow: hidden;
 }
 
-.app-rating.one{
-  background: transparent url('../images/stars.png') no-repeat -78px 0 ;
+.app-rating-count {
+  padding: 2px 10px;
+  float: left;
 }
 
 .app-teaser .app-action {
@@ -207,6 +216,11 @@ body .path-admin-apps span.icon {
   clear: both;
   min-width:960px;
   margin-bottom:30px;
+}
+
+.app-main {
+  float:left;
+  max-width:70%;
 }
 
 #sidebar {
@@ -281,7 +295,7 @@ body .path-admin-apps span.icon {
 
 #app-wrapper .app-screenshot .screenshot-shadow {
   top: 11px;
-  left: 272px;
+  left: 11px;
   width: 590px;
   height: 370px;
 }
@@ -295,4 +309,8 @@ body .path-admin-apps span.icon {
 }
 .block #apps-list {
   min-width:0;
+}
+
+#apps-voting-error {
+  clear:both;
 }

@@ -279,9 +279,16 @@ return drupal_get_form('apps_config_form');
 function apps_config_form() {
   $form = array();
   $form['apps_enable_developement_console'] = array(
-    '#title' => 'Enable Developement Console',
+    '#title' => t('Enable Developement Console'),
+    '#description' => t('Allows local apps to be displayed in a development app console.'),
     '#type' => 'checkbox',
     '#default_value'=> variable_get('apps_enable_developement_console', FALSE),
+  );
+  $form['apps_allow_voting'] = array(
+    '#title' => t('Allow Voting'),
+    '#description' => t('Allow users who can install apps to also rate them.  Requires that the appserver is running the appserver module.'),
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('apps_allow_voting', TRUE),
   );
   $form = system_settings_form($form);
   $form['#submit'][] = 'apps_config_form_submit';
