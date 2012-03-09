@@ -85,10 +85,10 @@ function drush_apps_list() {
     foreach ($apps as $k => $app) {
       $status = '';
       switch($app['status']) {
-        CASE INCOMPATABLE : $status = 'Incompatable'; break;
-        CASE DISABLED : $status = 'Disabled'; break;
-        CASE ENABLED : $status = 'Enabled'; break;
-        CASE INSTALLABLE : $status = 'Installable'; break;
+        CASE APPS_INCOMPATIBLE : $status = 'Incompatible'; break;
+        CASE APPS_DISABLED : $status = 'Disabled'; break;
+        CASE APPS_ENABLED : $status = 'Enabled'; break;
+        CASE APPS_INSTALLABLE : $status = 'Installable'; break;
       }
       $rows[] = array(
         $k,

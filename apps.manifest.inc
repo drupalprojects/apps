@@ -5,10 +5,10 @@
  *
  */
 
-define ("ENABLED", 1);
-define ("DISABLED", 0);
-define ("INCOMPATABLE", -1);
-define ("INSTALLABLE", 2);
+define("APPS_ENABLED", 1);
+define("APPS_DISABLED", 0);
+define("APPS_INCOMPATIBLE", -1);
+define("APPS_INSTALLABLE", 2);
 
 
 function apps_server_local($server) {
@@ -331,13 +331,13 @@ function apps_manifest($server) {
         $incompatable = $current ? (bool) drupal_check_incompatibility($version, $current->info['version']) : FALSE;
         $installed = (bool) $current;
         $enabled = $current && $current->status;
-        $status = $incompatable ? INCOMPATABLE : (!$installed ? INSTALLABLE : ($enabled ? ENABLED : DISABLED));
+        $status = $incompatable ? APPS_INCOMPATIBLE : (!$installed ? APPS_INSTALLABLE : ($enabled ? APPS_ENABLED : APPS_DISABLED));
 
-        if($status == INCOMPATABLE) {
+        if($status == APPS_INCOMPATIBLE) {
           //if any one module is incompatable then the app is incompatable
           $app['incompatable'] = TRUE;
         }
-        if($status == INSTALLABLE) {
+        if($status == APPS_INSTALLABLE) {
           //if any one module is installable then we are not installed yet
           $app['dep_installed'] = FALSE;
         }
@@ -358,7 +358,7 @@ function apps_manifest($server) {
           $info = array(
             'downloadable' => $downloadable,
             'version' => array('name'=>$name_version),
-            'status' => INSTALLABLE,
+            'status' => APPS_INSTALLABLE,
             'incompatable' => 0,
             'enabled' => 0,
             'installed' =>  is_dir(DRUPAL_ROOT . "/sites/all/libraries/$name_version"),
@@ -366,7 +366,7 @@ function apps_manifest($server) {
           $app['libraries'][$name_version] = $info;
         }
       }
-      $app['status'] = $app['incompatable'] ? INCOMPATABLE : (!$app['installed'] || !$app['dep_installed'] ? INSTALLABLE : ($app['enabled'] ? ENABLED : DISABLED));
+      $app['status'] = $app['incompatable'] ? APPS_INCOMPATIBLE : (!$app['installed'] || !$app['dep_installed'] ? APPS_INSTALLABLE : ($app['enabled'] ? APPS_ENABLED : APPS_DISABLED));
       $apps[$app['machine_name']] = $app;
       
     }
