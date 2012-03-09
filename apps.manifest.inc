@@ -146,49 +146,47 @@ function apps_client_id() {
  *
  * TODO: Handle lack of server presense OPIC-374
  */
-function apps_request_manifest($server) { 
-  //$manifest_cache = cache_get("apps_manifest_{$server['name']}");
-  $manifest_cache = false;
-  $manifest = $manifest_cache ? $manifest_cache->data : FALSE;
+function apps_request_manifest($server) {
+  if ($cache = cache_get("apps_manifest_{$server['name']}")) {
+    return $cache->data;
+  }
 
-  if(!$manifest) {
-    if(!$server['manifest']) {
-       $apps = apps_server_local($server);
-       $manifest = $server;
-       $manifest['apps'] = $apps;
-       apps_request_manifest_image_process($manifest);
-       return $manifest;
-    }
-    $info =  drupal_parse_info_file(dirname(__file__) . '/apps.info');
-    $rest_data = array(
-      'client_id' => apps_client_id(),
-      'apps_version' => $info['version'],
-      'format' => 'json',
-    ) + $server;
-    //I would like to do a post request but it is not happening
-    //$request = drupal_http_request($server['manifest'], array('method' => 'POST', 'data' => drupal_http_build_query($rest_data)));
-    $request = drupal_http_request($server['manifest'] . "?" . drupal_http_build_query($rest_data));
+  if(!$server['manifest']) {
+     $apps = apps_server_local($server);
+     $manifest = $server;
+     $manifest['apps'] = $apps;
+     apps_request_manifest_image_process($manifest);
+     return $manifest;
+  }
+  $info =  drupal_parse_info_file(dirname(__file__) . '/apps.info');
+  $rest_data = array(
+    'client_id' => apps_client_id(),
+    'apps_version' => $info['version'],
+    'format' => 'json',
+  ) + $server;
+  //I would like to do a post request but it is not happening
+  //$request = drupal_http_request($server['manifest'], array('method' => 'POST', 'data' => drupal_http_build_query($rest_data)));
+  $request = drupal_http_request($server['manifest'] . "?" . drupal_http_build_query($rest_data));
 
-    if (isset($request->error)) {
-      $manifest = array(
-        'error' =>"Manifest: {$server['manifest']} {$request->error}",
-        'request' => $request,
-        'apps' => array(),
-      );
-    }
-    else if ($manifest = json_decode($request->data, TRUE)) {
-      // add any local apps
-      //$manifest['apps'] = $manifest['apps'] + $apps;
-      apps_request_manifest_image_process($manifest);
-      cache_set("apps_manifest_{$server['name']}", $manifest, 'cache', time() + 60 +30);
-    }
-    else {
-      $manifest = array(
-        'error' =>"Manifest: {$server['manifest']} json not parsable",
-        'request' => $request,
-        'apps' => array(),
-      );
-    }
+  if (isset($request->error)) {
+    $manifest = array(
+      'error' =>"Manifest: {$server['manifest']} {$request->error}",
+      'request' => $request,
+      'apps' => array(),
+    );
+  }
+  else if ($manifest = json_decode($request->data, TRUE)) {
+    // add any local apps
+    //$manifest['apps'] = $manifest['apps'] + $apps;
+    apps_request_manifest_image_process($manifest);
+    cache_set("apps_manifest_{$server['name']}", $manifest, 'cache', REQUEST_TIME + 60 +30);
+  }
+  else {
+    $manifest = array(
+      'error' =>"Manifest: {$server['manifest']} json not parsable",
+      'request' => $request,
+      'apps' => array(),
+    );
   }
 
   return $manifest;

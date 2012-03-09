@@ -5,6 +5,7 @@
 
 define("APPSERVER_BASEPATH", 'admin/apps');
 define("APPSERVER_BASEPATH_DEPTH", 1);
+require_once(drupal_get_path('module', 'apps') . '/theme/apps.theme.inc');
 
 /**
  * Implements hook_permission().
