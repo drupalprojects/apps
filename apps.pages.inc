@@ -140,11 +140,11 @@ function _apps_app_access($perm, $server_name, $action, $app_name) {
       case FALSE:
         return TRUE;
       case 'enable':
-        return ($app['status'] === DISABLED);
+        return ($app['status'] === APPS_DISABLED);
       case 'disable':
-        return ($app['status'] === ENABLED);
+        return ($app['status'] === APPS_ENABLED);
       case 'install':
-        return ($app['status'] === INSTALLABLE);
+        return ($app['status'] === APPS_INSTALLABLE);
       case 'configure-action':
       case 'configure': 
         return (bool) apps_app_callback($app, "configure form") || apps_app_callback($app, "demo content enabled callback");

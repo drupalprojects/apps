@@ -30,12 +30,12 @@ function apps_preprocess_apps_app_teaser(&$vars) {
     $vars['logo'] = FALSE;
   }
   $status = $vars['app']['status'];
-  $vars['status'] = $status === ENABLED ?
+  $vars['status'] = $status === APPS_ENABLED ?
     'enabled' :
-    (($status === DISABLED) ?
+    (($status === APPS_DISABLED) ?
       'disabled' :
-      (($status === INCOMPATABLE) ?
-        'incompatable' :
+      (($status === APPS_INCOMPATIBLE) ?
+        'incompatible' :
         'available'
       )
     );
@@ -75,20 +75,20 @@ function apps_preprocess_apps_app_page(&$vars) {
   $vars['name'] = $vars['app']['name'];
   $vars['author'] = l($vars['app']['author'], $vars['app']['author_url']);
   $vars['version'] = t('Version') . ' ' . $vars['app']['version'];
-  if ($vars['app']['status'] === INCOMPATABLE) {
+  if ($vars['app']['status'] === APPS_INCOMPATIBLE) {
     $incompatable_deps = array();
     $incompatable_message = '';
     foreach($vars['app']['dependencies'] as $dep) {
-      if ($dep['status'] === INCOMPATABLE) {
+      if ($dep['status'] === APPS_INCOMPATIBLE) {
         $incompatable_deps[] = "{$dep['version']['name']} {$dep['version']['original_version']}";
       }
     }
     if (!empty($incompatable_deps)) {
-      $incompatable_message = "Incompatable - requires " . implode(", ", $incompatable_deps);
+      $incompatable_message = "Incompatible - requires " . implode(", ", $incompatable_deps);
     }
     else {
       //this should never run
-      $incompatable_message = "Incompatable with current install";
+      $incompatable_message = "Incompatible with current install";
     }
     //drupal_set_message($incompatable_message, 'error');
     $vars['status'] = $incompatable_message;
