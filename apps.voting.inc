@@ -109,17 +109,17 @@ function apps_theme_voting_widget($vars) {
       '#suffix' => '</div>',
     ),
     '#suffix' => '</div>',
-    'totalrating' => array(
+  );
+  // Only add the components for voting to non teaser pages
+  if (!$teaser && variable_get('apps_allow_voting', TRUE)) {
+    $render_arr['totalrating'] = array(
       '#prefix' => '<div class="app-average-rating">',
       '#markup' => t('Average rating: !stars stars', array(
           '!stars' => '<span class="stars-count">' . round($ratings['average'] / 20, 1) . '</span>'
         )
       ),
       '#suffix' => '</div>',
-    ),
-  );
-  // Only add the components for voting to non teaser pages
-  if (!$teaser && variable_get('apps_allow_voting', TRUE)) {
+    );
     $render_arr['userrating'] = array(
       '#prefix' => '<div class="app-user-rating ' . $hasvote . '">',
       '#markup' => t('Your rating: !stars stars', array(
