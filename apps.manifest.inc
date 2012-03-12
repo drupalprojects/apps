@@ -197,7 +197,6 @@ function apps_request_manifest($server) {
  */
 function apps_request_manifest_image_process(&$manifest) {
   foreach($manifest['apps'] as $id => $app) {
-    
     //Get Logo
     $logo_uri = $app['logo'];
     $logo = (array) apps_retrieve_app_image($app['logo'], "{$app['name']} Logo");
@@ -252,12 +251,13 @@ function apps_retrieve_app_image($url, $title = FALSE, $alt = FALSE) {
   if (!empty($fids) && isset($fids[0]) && is_numeric($fids[0])) {
     $current = file_load($fids[0]);
   }
-   //check to see if the remote file is newer than the one that we have
-  if($current){
+   //check to see if the remote file is newer than the one that we have and that the one we have
+   // still exists
+  if($current && file_exists($current->uri)){
     $remote = drupal_http_request($url, array('method' => 'HEAD')); //get the remote headers
     $remote = $remote->headers;
     $remote_timestamp = strtotime($remote['last-modified']);
-    
+
     if($remote_timestamp <= $current->timestamp && $remote['content-length'] == $current->filesize){
       //TODO make this a file 
       $current->path = $current->uri;
