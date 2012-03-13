@@ -169,8 +169,7 @@ function apps_profile_download_batch_finished($success, $results) {
   }
   elseif ($success) {
     drupal_set_message(t('Updates downloaded successfully.'));
-    $_SESSION['update_manager_update_projects'] = $results['projects'];
-    //drupal_goto('admin/update/ready'); //This was removed.
+    $_SESSION['update_manager_update_projects'] = isset($results['projects']) ? $results['projects'] : NULL;
   }
   else {
     // Ideally we're catching all Exceptions, so they should never see this,
