@@ -43,6 +43,7 @@ function apps_profile_install_tasks($install_state, $apps_server) {
       ),
       'apps_profile_enable_app_modules_' . $apps_server_name => array(
         'display' => FALSE,
+        'type' => 'batch',
         'run' => (isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
         'function' => 'apps_profile_enable_app_modules',
       ),
@@ -279,13 +280,66 @@ function apps_profile_enable_app_modules(&$install_state) {
     if (!apps_profile_check_dependencies(array($module => $module))) {
       // Something went wrong. Remove from queue and add error.
       unset($modules[$id]);
-      drupal_set_message(t('There was an error installing @module.', array('@module' => $module)), 'error');
+      $module_info = system_get_info('module', $module);
+      $module_name = isset($module_info['name']) ? $module_info['name'] : $module;
+      drupal_set_message(t('There was an error installing @module app.', array('@module' => $module_name)), 'error');
     }
   }
   if (!empty($modules)) {
-    module_enable($modules);
+    // Setup the batch omments
+    $enable_commands = array();
+    foreach($modules as $module) {
+      $module_info = system_get_info('module', $module);
+      $module_name = isset($module_info['name']) ? $module_info['name'] : $module;
+      $enable_commands[] = array('app_profile_enable_module', array($module, $module_name));
+    }
+
+    // Setup the batch operation
+    $batch = array(
+      'operations' => $enable_commands,
+      'file' => drupal_get_path('module', 'apps') . '/apps.profile.inc',
+      'title' => t('Enabling apps'),
+      'init_message' => t('Preparing to enable the needed apps'),
+      'finished' => 'apps_profile_enable_app_modules_finished',
+    );
+    return $batch;
   }
-  
+}
+
+function app_profile_enable_module($module, $module_name, &$context) {
+
+  // This is here to show the user that we are in the process of enabling
+  $context['message'] = t('Enabled %module app', array('%module' => $module_name));
+
+  // Enable the module and record any errors
+  if (!module_enable(array($module))) {
+    $context['results']['errors'][$module] = t('There was an error enabling @module app.', array('@module' => $module_name));
+  }
+
+  // Successful outcome
+  $context['finished'] = TRUE;
+}
+
+/**  
+ * Batch callback invoked when enable batch is completed.
+ */
+function apps_profile_enable_app_modules_finished($success, $results) {
+  if (!empty($results['errors'])) {
+    $error_list = array(
+      'title' => t('Enabling apps failed:'),
+      'items' => $results['errors'],
+    );
+    drupal_set_message(theme('item_list', $error_list), 'error');
+  }
+  elseif ($success) {
+    drupal_set_message(t('Apps enabled successfully.'));
+  }
+  else {
+    // Ideally we're catching all Exceptions, so they should never see this,
+    // but just in case, we have to tell them something.
+    drupal_set_message(t('Fatal error trying to enable apps.'), 'error');
+  }
+
   // Do a little cleanup
   unset($_SESSION['apps']);
   unset($_SESSION['apps_default_content']);
