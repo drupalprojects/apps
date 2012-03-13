@@ -10,38 +10,38 @@
  * See apps.api.php for use.
  *
  */
-function apps_profile_install_tasks($install_state, $apps_server, $default_apps = array()) {
+function apps_profile_install_tasks($install_state, $apps_server) {
   // Only use apps forms during interactive installs.
   $tasks = array();
   if ($install_state['interactive']) {
-    $_SESSION['apps_defaults'] = $default_apps;
     $_SESSION['apps_server'] = $apps_server;
+    $apps_server_name = $apps_server['machine name'];
     $tasks = array(
-      'apps_profile_apps_select_form_' . $apps_server => array(
+      'apps_profile_apps_select_form_' . $apps_server_name => array(
         'display_name' => st('Install Apps'),
         'type' => 'form',
         'function' => 'apps_profile_apps_select_form',
       ),
-      'apps_profile_download_app_modules_' . $apps_server => array(
+      'apps_profile_download_app_modules_' . $apps_server_name => array(
         'display' => FALSE,
         'type' => 'batch',
         'run' => (isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
         'function' => 'apps_profile_download_app_modules',
       ),
       // Only need this if using filetransfer authorization.
-      'apps_profile_authorize_transfer_' . $apps_server => array(
+      'apps_profile_authorize_transfer_' . $apps_server_name => array(
         'display' => FALSE,
         'type' => 'form',
         'run' => (!is_writeable(conf_path()) && isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
         'function' => 'apps_profile_authorize_transfer',
       ),
-      'apps_profile_install_app_modules_' . $apps_server => array(
+      'apps_profile_install_app_modules_' . $apps_server_name => array(
         'display' => FALSE,
         'type' => 'batch',
         'run' => (isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
         'function' => 'apps_profile_install_app_modules',
       ),
-      'apps_profile_enable_app_modules_' . $apps_server => array(
+      'apps_profile_enable_app_modules_' . $apps_server_name => array(
         'display' => FALSE,
         'run' => (isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
         'function' => 'apps_profile_enable_app_modules',
@@ -61,7 +61,7 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
 
   // If there is no internet things get in an unfixable state. Use try->catch
   try {
-    $_SESSION['apps_manifest'] = apps_apps($_SESSION['apps_server']);
+    $_SESSION['apps_manifest'] = apps_apps($_SESSION['apps_server']['machine name']);
   }
   catch (Exception $e) {
     $form['info'] = array(
@@ -99,7 +99,7 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
     $form['apps_fieldset']['apps'] = array(
       '#type' =>'checkboxes',
       '#title' => t('Apps'),
-      '#default_value' => $_SESSION['apps_defaults'],
+      '#default_value' => $_SESSION['apps_server']['default apps'],
       '#options' => $options,
     );
 
@@ -267,21 +267,19 @@ function apps_profile_install_app_modules(&$install_state) {
  */
 function apps_profile_enable_app_modules(&$install_state) {
   $modules = array_keys($_SESSION['apps']);
+  // Allow profiles to add default content.
+  if ($_SESSION['apps_default_content'] && isset($_SESSION['apps_server']['default content callback'])) {
+    $function = $_SESSION['apps_server']['default content callback'];
+    if (function_exists($function)) {
+      $function($modules);
+    }
+  }
+  // Do dependency checking so everything doesn't break from one missing dependency.
   foreach($modules as $id => $module) {
     if (!apps_profile_check_dependencies(array($module => $module))) {
       // Something went wrong. Remove from queue and add error.
       unset($modules[$id]);
       drupal_set_message(t('There was an error installing @module.', array('@module' => $module)), 'error');
-    }
-  }
-  if ($_SESSION['apps_default_content']) {
-    $modules[] = 'enterprise_content';
-    $files = system_rebuild_module_data();
-    foreach($modules as $module) {
-      // Should probably check the app to see the proper way to do this.
-      if (isset($files[$modules . '_content'])) {
-        $modules[] = $modules . '_content';
-      }
     }
   }
   if (!empty($modules)) {
