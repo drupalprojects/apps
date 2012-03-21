@@ -299,7 +299,7 @@ function apps_retrieve_app_image($url, $title = FALSE, $alt = FALSE) {
 function apps_manifest($server) {
   $manifests = &drupal_static(__function__);
   require_once DRUPAL_ROOT . '/includes/install.inc';
-  if (!$manifests[$server['name']] && !isset($manifests[$server['name']]['error'])) {
+  if (empty($manifests[$server['name']]) && !isset($manifests[$server['name']]['error'])) {
     // Get manifest from server
     $manifest = apps_request_manifest($server);
     //if there is an error with the manifest jump out now
