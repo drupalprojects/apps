@@ -83,7 +83,10 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
     $form['actions'] = array('#type' => 'actions', '#weight' => 3);
     foreach($_SESSION['apps_manifest'] as $name => $app) {
       if ($name != '#theme') {
-        $options[$name] = '<strong>' . $app['name'] . '</strong><br>' . $app['description'];
+        $options[$name] = '<strong>' . $app['name'] . '</strong>';
+        if (isset($app['description'])) {
+          $options[$name] .= '<br>' . $app['description'];
+        }
       }
     }
     $form = array();
