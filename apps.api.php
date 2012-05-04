@@ -74,6 +74,7 @@ function hook_install_tasks($install_state) {
   $tasks = array();
   require_once(drupal_get_path('module', 'apps') . '/apps.profile.inc');
   $server = array(
+    'title' => 'App Server Name'
     'machine name' => 'apps_server_machine_name',
     'default apps' => array(
       'app_machine_name_1',
