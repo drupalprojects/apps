@@ -352,7 +352,10 @@ function apps_profile_enable_app_modules_finished($success, $results) {
   }
 
   // Do a little cleanup
-  unset($_SESSION['apps']);
+  // We cannot unset $_SESSION['apps'] here because it is used in the
+  // run' check for this task and can cause wierd interactions with 
+  // the batch operations.
+  // unset($_SESSION['apps']);
   unset($_SESSION['apps_default_content']);
   unset($_SESSION['apps_server']);
   unset($_SESSION['apps_manifest']);
