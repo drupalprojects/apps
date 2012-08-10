@@ -327,15 +327,14 @@ function app_profile_enable_module($module, $module_name, &$context) {
  * Batch callback invoked when enable batch is completed.
  */
 function apps_profile_enable_app_modules_finished($success, $results) {
+  // Only display errors, on success do nothing since on success any
+  // message we print will show up in a weird context (next page)
   if (!empty($results['errors'])) {
     $error_list = array(
       'title' => t('Enabling apps failed:'),
       'items' => $results['errors'],
     );
     drupal_set_message(theme('item_list', $error_list), 'error');
-  }
-  elseif ($success) {
-    drupal_set_message(t('Apps enabled successfully.'));
   }
   else {
     // Ideally we're catching all Exceptions, so they should never see this,
