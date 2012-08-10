@@ -55,10 +55,10 @@ function apps_servers($server_name = FALSE) {
     }
   }
   // if we have the dev console turned on add it as a server
-  if (variable_get('apps_enable_developement_console', FALSE)) {
+  if (variable_get('apps_enable_dev_console', FALSE)) {
     $servers['development'] = array(
       'name' => 'development',
-      'description' => 'Local Apps in Developement',
+      'description' => 'Local Apps in Development',
       'title' => 'Development',
       'manifest' => FALSE,
       'featured app' => FALSE,
