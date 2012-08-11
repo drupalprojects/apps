@@ -14,11 +14,13 @@ function apps_profile_install_tasks($install_state, $apps_server) {
   // Only use apps forms during interactive installs.
   $tasks = array();
   if ($install_state['interactive']) {
-    $_SESSION['apps_server'] = $apps_server;
     $apps_server_name = $apps_server['machine name'];
+
+    $task_screen = 'apps_profile_apps_select_form_' . $apps_server_name;
+    $_SESSION['apps_servers'][$task_screen] = $apps_server;
     $tasks = array(
-      'apps_profile_apps_select_form_' . $apps_server_name => array(
-        'display_name' => st('Install Apps'),
+      $task_screen => array(
+        'display_name' => apps_profile_get_server_name($apps_server),
         'type' => 'form',
         'function' => 'apps_profile_apps_select_form',
       ),
@@ -62,7 +64,10 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
 
   // If there is no internet things get in an unfixable state. Use try->catch
   try {
-    $_SESSION['apps_manifest'] = apps_apps($_SESSION['apps_server']['machine name']);
+    $apps_server = $_SESSION['apps_servers'][$install_state['active_task']];
+
+    $_SESSION['apps_server'] = $apps_server;
+    $_SESSION['apps_manifest'] = apps_apps($apps_server['machine name']);
   }
   catch (Exception $e) {
     $form['info'] = array(
@@ -80,6 +85,7 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
     drupal_set_message('<b>Unable to contact Apps Server.</b><br> For some reason we were unable to contact the apps server.', 'error');
   }
   else {
+    drupal_set_title(apps_profile_get_server_name($_SESSION['apps_server']));
     $form['actions'] = array('#type' => 'actions', '#weight' => 3);
     foreach($_SESSION['apps_manifest'] as $name => $app) {
       if ($name != '#theme') {
@@ -137,6 +143,7 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
  * Submit function for apps_profile_apps_select_form.
  */
 function apps_profile_apps_select_form_submit($form, &$form_state) {
+  $_SESSION['apps'] = array();
   if ($form_state['values']['op'] == t('Install Apps')) {
     $_SESSION['apps'] = array_filter($form_state['values']['apps']);
     $_SESSION['apps_default_content'] = $form_state['values']['default_content'];
@@ -148,6 +155,7 @@ function apps_profile_apps_select_form_submit($form, &$form_state) {
  */
 function apps_profile_download_app_modules(&$install_state) {
   apps_include('installer');
+  $apps = array();
   foreach ($_SESSION['apps'] as $id => $name) {
     $apps[] = $_SESSION['apps_manifest'][$name];
   }
@@ -343,7 +351,10 @@ function apps_profile_enable_app_modules_finished($success, $results) {
   }
 
   // Do a little cleanup
-  unset($_SESSION['apps']);
+  // We cannot unset $_SESSION['apps'] here because it is used in the
+  // run' check for this task and can cause wierd interactions with 
+  // the batch operations.
+  // unset($_SESSION['apps']);
   unset($_SESSION['apps_default_content']);
   unset($_SESSION['apps_server']);
   unset($_SESSION['apps_manifest']);
@@ -384,4 +395,15 @@ function apps_profile_check_dependencies($module_list) {
   
   // If we make it this far then everything is good.
   return TRUE;
+}
+
+/**
+ * Generate the title of the Apps install screen
+ */
+function apps_profile_get_server_name($server) {
+  $t = get_t();
+  return isset($server['title'])
+             ? $t('Install @name Apps', array('@name' => $server['title']))
+             : $t('Install Apps');
+
 }
