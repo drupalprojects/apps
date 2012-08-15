@@ -79,6 +79,17 @@ function apps_hook_info() {
 }
 
 /**
+ * Check whether Apps has write access to libraries and modules directories.
+ *
+ * @return boolean
+ */
+function apps_installer_has_write_access() {
+  $libraries_dir = (is_dir('sites/all/libraries')) ? 'sites/all/libraries' : 'sites/all';
+  return is_writable(drupal_realpath($libraries_dir)) && is_writable(drupal_realpath('sites/all/modules'));
+}
+
+
+/**
  * Implements hook_block_info().
  */
 function apps_block_info() {
