@@ -258,7 +258,7 @@ function apps_retrieve_app_image($url, $title = FALSE, $alt = FALSE) {
     $remote = $remote->headers;
     $remote_timestamp = strtotime($remote['last-modified']);
 
-    if($remote_timestamp <= $current->timestamp && $remote['content-length'] == $current->filesize){
+    if($remote_timestamp <= $current->timestamp && !empty($remote['content-length']) && $remote['content-length'] == $current->filesize){
       //TODO make this a file 
       $current->path = $current->uri;
       $current->title = $title ? $title : '';
