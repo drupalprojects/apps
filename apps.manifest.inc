@@ -273,7 +273,7 @@ function apps_retrieve_app_image($url, $title = FALSE, $alt = FALSE) {
     if (!file_exists(drupal_realpath(file_build_uri('apps')))) {
       drupal_mkdir(file_build_uri('apps'));
     }
-    $file = file_save_data($request->data, $uri, FILE_EXISTS_REPLACE);
+    $file = file_save_data($request->data, $uri, FILE_EXISTS_RENAME);
     if ($current) {
       $file->fid = $current->fid;
     }
