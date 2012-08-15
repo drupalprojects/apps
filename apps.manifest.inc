@@ -353,6 +353,8 @@ function apps_manifest($server) {
         $app['dependencies'][$version['name']] = $info;
       }
       if (isset($app['libraries'])) {
+        $profile = variable_get('install_profile', 'standard');
+        $profile_path = drupal_get_path('profile', $profile);
         foreach($app['libraries'] as $name_version => $downloadable) {
           $info = array(
             'downloadable' => $downloadable,
@@ -360,7 +362,7 @@ function apps_manifest($server) {
             'status' => APPS_INSTALLABLE,
             'incompatable' => 0,
             'enabled' => 0,
-            'installed' =>  is_dir(DRUPAL_ROOT . "/sites/all/libraries/$name_version"),
+            'installed' =>  is_dir(DRUPAL_ROOT . "/sites/all/libraries/$name_version") || is_dir($profile_path . "/libraries/$name_version"),
           );
           $app['libraries'][$name_version] = $info;
         }
