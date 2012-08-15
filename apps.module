@@ -5,6 +5,8 @@
 
 define("APPSERVER_BASEPATH", 'admin/apps');
 define("APPSERVER_BASEPATH_DEPTH", 1);
+define("APPS_INSTALL_PATH", 'sites/all/modules');
+
 require_once(drupal_get_path('module', 'apps') . '/theme/apps.theme.inc');
 
 /**
@@ -85,7 +87,7 @@ function apps_hook_info() {
  */
 function apps_installer_has_write_access() {
   $libraries_dir = (is_dir('sites/all/libraries')) ? 'sites/all/libraries' : 'sites/all';
-  return is_writable(drupal_realpath($libraries_dir)) && is_writable(drupal_realpath('sites/all/modules'));
+  return is_writable(drupal_realpath($libraries_dir)) && is_writable(drupal_realpath(APPS_INSTALL_PATH));
 }
 
 

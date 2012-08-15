@@ -23,6 +23,12 @@ function apps_profile_install_tasks($install_state, $apps_server) {
     $task_screen = 'apps_profile_apps_select_form_' . $apps_server_name;
     $_SESSION['apps_servers'][$task_screen] = $apps_server;
     $tasks = array(
+      // Setup an initial task to verify capability to run apps.
+      'apps_install_verify' => array(
+        'display_name' => t('Verify Apps support'),
+        'type' => 'form',
+        'function' => 'apps_install_verify',
+      ),
       $task_screen => array(
         'display_name' => apps_profile_get_server_name($apps_server),
         'type' => 'form',
@@ -284,7 +290,7 @@ function apps_profile_install_app_modules(&$install_state) {
 function apps_profile_enable_app_modules(&$install_state) {
   $modules = array_keys($_SESSION['apps']);
   // Allow profiles to add default content.
-  if ($_SESSION['apps_default_content'] && isset($_SESSION['apps_server']['default content callback'])) {
+  if (isset($_SESSION['apps_default_content']) && isset($_SESSION['apps_server']['default content callback'])) {
     $function = $_SESSION['apps_server']['default content callback'];
     if (function_exists($function)) {
       $function($modules);
@@ -301,7 +307,7 @@ function apps_profile_enable_app_modules(&$install_state) {
     }
   }
   if (!empty($modules)) {
-    // Setup the batch omments
+    // Setup the batch comments
     $enable_commands = array();
     foreach($modules as $module) {
       $module_info = system_get_info('module', $module);
@@ -400,6 +406,106 @@ function apps_profile_check_dependencies($module_list) {
   // If we make it this far then everything is good.
   return TRUE;
 }
+
+/**
+ * Show instructions and check system services to help guide direction
+ * for Apps installs.
+ */
+function apps_install_verify() {
+  $form = array();
+
+  $form['opening'] = array(
+    '#markup' => '<h1>' . t('Verify Apps support') . '</h1>',
+  );
+
+  $form['openingtext'] = array(
+    '#markup' => '<p>' . t('Installation of Apps requires that modules are installed on your site using the same mechanism as the Update module in Drupal core. This functionality depends on certain PHP extensions being enabled on your server. Below is the documentation & verification for the various methods of installing. <strong>Note that you need only <em>one</em> of these methods enabled in order to install apps.</strong>') . '</p>',
+    '#weight' => -10,
+  );
+
+  // Verify FTP support
+  $ftp_installed = extension_loaded('ftp');
+  $form['ftp'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('FTP (!status)', array('!status' => $ftp_installed ? t('Enabled!') : t('Not enabled'))),
+    '#description' => '',
+    '#collapsible' => !$ftp_installed,
+    '#collapsed' => !$ftp_installed,
+    '#weight' => $ftp_installed ? 0 : 10,
+  );
+  if (!$ftp_installed) {
+    $form['ftp']['#description'] .= t('Your server does not have the FTP PHP extension. You will need to install it or use an alternative method. See <a href="http://us2.php.net/manual/en/book.ftp.php">http://us2.php.net/manual/en/book.ftp.php</a> for how to install the FTP PHP extension.') . '<br /><br />';
+  }
+  $form['ftp']['#description'] .= t('To install with FTP, you will need an FTP username and password that has permissions to write to your site directory on your server. Be aware that FTP is not an encrypted protocol and your credentials will be transmitted in the clear.');
+
+  // Verify SSH support
+  $ssh_installed = extension_loaded('ssh2');
+  $form['ssh'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('SSH (!status)', array('!status' => $ssh_installed ? t('Enabled!') : t('Not enabled'))),
+    '#description' => '',
+    '#collapsible' => !$ssh_installed,
+    '#collapsed' => !$ssh_installed,
+    '#weight' => $ssh_installed ? 1 : 11,
+  );
+  if (!$ssh_installed) {
+    $form['ssh']['#description'] .= t('Your server does not have ssh2 installed. You will need to install it or use an alternative method. See <a href="http://us2.php.net/manual/en/book.ssh2.php">http://us2.php.net/manual/en/book.ssh2.php</a> for how to install the ssh2 php extension.') . '<br /><br />';
+  }
+  $form['ssh']['#description'] .= t('To install with SSH, you will need a username and password of a user that can SSH into the server and has write permissions to your site directory on your server.');
+
+  // Verify web server write permissions
+  $install_permissions = apps_installer_has_write_access();
+  $vars = array('@install_path' => APPS_INSTALL_PATH);
+  $form['webserver'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Webserver direct install (!status)', array('!status' => $install_permissions ? t('Enabled!') : t('Not enabled'))),
+    '#description' => '',
+    '#collapsible' => !$install_permissions,
+    '#collapsed' => !$install_permissions,
+    '#weight' => $install_permissions ? 2 : 12,
+  );
+  $form['webserver']['#description'] .= $install_permissions
+    ? t('You have write permissions to @install_path.', $vars) . '<br /><br />'
+    : t('You do not have sufficient permissions to install by webserver direct install. In order to assign these permissions, go to the root of your drupal install and type <br/><br/><strong>sudo chmod -R 777 @install_path</strong>', $vars) . '<br /><br />';
+  $form['webserver']['#description'] .= t('Be aware that there are security issues with leaving your site in this state.');
+
+  // When altering this form and adding an install option, set this value to
+  // TRUE if your option is enabled (available).
+  $app_enabled = $ftp_installed || $ssh_installed || $install_permissions;
+  $form['app_enabled'] = array(
+    '#type' => 'value',
+    '#value' => $app_enabled,
+  );
+
+  $form['#process'] = array('apps_install_verify_process');
+
+  $form['continue'] = array(
+    '#type' => 'submit',
+    '#value' => t('Continue'),
+    '#weight' => 20,
+  );
+
+  return $form;
+}
+
+/**
+ * Process callback for apps_install_verify form.
+ *
+ * If no options are enabled, show all of them and a message.
+ */
+function apps_install_verify_process($form) {
+  if (!$form['app_enabled']['#value']) {
+    foreach (element_children($form) as $key) {
+      if (isset($form[$key]['#type']) && $form[$key]['#type'] == 'fieldset') {
+        $form[$key]['#collapsible'] = FALSE;
+        $form[$key]['#collapsed'] = FALSE;
+      }
+    }
+    drupal_set_message(t('No app install methods were found. <a href="!url">Retry verification</a>', array('!url' => check_url(drupal_current_script_url()))), 'warning');
+  }
+  return $form;
+}
+
 
 /**
  * Generate the title of the Apps install screen
