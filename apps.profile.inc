@@ -344,7 +344,7 @@ function apps_profile_enable_app_modules_finished($success, $results) {
     );
     drupal_set_message(theme('item_list', $error_list), 'error');
   }
-  else {
+  elseif(!$success) {
     // Ideally we're catching all Exceptions, so they should never see this,
     // but just in case, we have to tell them something.
     drupal_set_message(t('Fatal error trying to enable apps.'), 'error');
