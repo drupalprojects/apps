@@ -17,50 +17,49 @@ function apps_profile_install_tasks($install_state, $apps_server) {
 
   // Only use apps forms during interactive installs.
   $tasks = array();
-  if ($install_state['interactive']) {
-    $apps_server_name = $apps_server['machine name'];
+  $apps_server_name = $apps_server['machine name'];
 
-    $task_screen = 'apps_profile_apps_select_form_' . $apps_server_name;
-    $_SESSION['apps_servers'][$task_screen] = $apps_server;
-    $tasks = array(
-      // Setup an initial task to verify capability to run apps.
-      'apps_install_verify' => array(
-        'display_name' => t('Verify Apps support'),
-        'type' => 'form',
-        'function' => 'apps_install_verify',
-      ),
-      $task_screen => array(
-        'display_name' => apps_profile_get_server_name($apps_server),
-        'type' => 'form',
-        'function' => 'apps_profile_apps_select_form',
-      ),
-      'apps_profile_download_app_modules_' . $apps_server_name => array(
-        'display' => FALSE,
-        'type' => 'batch',
-        'run' => (isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
-        'function' => 'apps_profile_download_app_modules',
-      ),
-      // Only need this if using filetransfer authorization.
-      'apps_profile_authorize_transfer_' . $apps_server_name => array(
-        'display' => FALSE,
-        'type' => 'form',
-        'run' => (!apps_installer_has_write_access() && isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
-        'function' => 'apps_profile_authorize_transfer',
-      ),
-      'apps_profile_install_app_modules_' . $apps_server_name => array(
-        'display' => FALSE,
-        'type' => 'batch',
-        'run' => (isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
-        'function' => 'apps_profile_install_app_modules',
-      ),
-      'apps_profile_enable_app_modules_' . $apps_server_name => array(
-        'display' => FALSE,
-        'type' => 'batch',
-        'run' => (isset($_SESSION['apps']))?INSTALL_TASK_RUN_IF_NOT_COMPLETED:INSTALL_TASK_SKIP,
-        'function' => 'apps_profile_enable_app_modules',
-      ),
-    );
-  }
+  $task_screen = 'apps_profile_apps_select_form_' . $apps_server_name;
+  $_SESSION['apps_servers'][$task_screen] = $apps_server;
+  $tasks = array(
+    // Setup an initial task to verify capability to run apps.
+    'apps_install_verify' => array(
+      'display_name' => t('Verify Apps support'),
+      'type' => 'form',
+      'function' => 'apps_install_verify',
+    ),
+    $task_screen => array(
+      'display_name' => apps_profile_get_server_name($apps_server),
+      'type' => 'form',
+      'function' => 'apps_profile_apps_select_form',
+    ),
+    'apps_profile_download_app_modules_' . $apps_server_name => array(
+      'display' => FALSE,
+      'type' => 'batch',
+      // If this is not an interactive install, we can download apps only if we have write access.
+      'run' => (!empty($_SESSION['apps_downloads']) && ($install_state['interactive'] || apps_installer_has_write_access())) ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
+      'function' => 'apps_profile_download_app_modules',
+    ),
+    // Only need this if using filetransfer authorization.
+    'apps_profile_authorize_transfer_' . $apps_server_name => array(
+      'display' => FALSE,
+      'type' => 'form',
+      'run' => (!empty($_SESSION['apps_downloads']) && $install_state['interactive'] && !apps_installer_has_write_access()) ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
+      'function' => 'apps_profile_authorize_transfer',
+    ),
+    'apps_profile_install_app_modules_' . $apps_server_name => array(
+      'display' => FALSE,
+      'type' => 'batch',
+      'run' => (!empty($_SESSION['apps_downloads']) && ($install_state['interactive'] || apps_installer_has_write_access())) ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
+      'function' => 'apps_profile_install_app_modules',
+    ),
+    'apps_profile_enable_app_modules_' . $apps_server_name => array(
+      'display' => FALSE,
+      'type' => 'batch',
+      'run' => (isset($_SESSION['apps'])) ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
+      'function' => 'apps_profile_enable_app_modules',
+    ),
+  );
   return $tasks;
 }
 
@@ -154,8 +153,14 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
  */
 function apps_profile_apps_select_form_submit($form, &$form_state) {
   $_SESSION['apps'] = array();
-  if ($form_state['values']['op'] == t('Install Apps')) {
+  // Checking to make sure that skip was not clicked. Proceed if op is empty
+  // to cover the non-interactive case where there is no op.
+  if (empty($form_state['values']['op']) || $form_state['values']['op'] == t('Install Apps')) {
     $_SESSION['apps'] = array_filter($form_state['values']['apps']);
+    // Determine if any apps need to be downloaded.
+    apps_include('manifest');
+    $installed_apps = apps_apps($_SESSION['apps_server']['machine name'], array('installed' => TRUE), TRUE);
+    $_SESSION['apps_downloads'] = array_diff_key($_SESSION['apps'], $installed_apps) ? TRUE: FALSE;
     $_SESSION['apps_default_content'] = $form_state['values']['default_content'];
   }
 }
@@ -288,7 +293,24 @@ function apps_profile_install_app_modules(&$install_state) {
  * Install downloaded apps.
  */
 function apps_profile_enable_app_modules(&$install_state) {
+  // If this is not an interactive install, we may have apps that were selected
+  // but not installed. Filter them out.
+  if (!$install_state['interactive']) {
+    apps_include('manifest');
+    // If not interactive it is one big request, clear some static caches
+    // so we recognized modules that have been downloaded just prior.
+    system_list_reset();
+    drupal_static_reset('apps_manifest');
+    $installed_apps = apps_apps($_SESSION['apps_server']['machine name'], array('installed' => TRUE), TRUE);
+    $_SESSION['apps'] = array_intersect_key($_SESSION['apps'], $installed_apps);
+    // If no selected apps are installed, we have nothing to enable.
+    if (empty($_SESSION['apps'])) {
+      return;
+    }
+  }
+
   $modules = array_keys($_SESSION['apps']);
+
   // Allow profiles to add default content.
   if (isset($_SESSION['apps_default_content']) && isset($_SESSION['apps_server']['default content callback'])) {
     $function = $_SESSION['apps_server']['default content callback'];
@@ -328,7 +350,6 @@ function apps_profile_enable_app_modules(&$install_state) {
 }
 
 function app_profile_enable_module($module, $module_name, &$context) {
-
   // This is here to show the user that we are in the process of enabling
   $context['message'] = t('Enabled %module app', array('%module' => $module_name));
 
@@ -362,12 +383,13 @@ function apps_profile_enable_app_modules_finished($success, $results) {
 
   // Do a little cleanup
   // We cannot unset $_SESSION['apps'] here because it is used in the
-  // run' check for this task and can cause wierd interactions with 
+  // run check for this task and can cause weird interactions with
   // the batch operations.
   // unset($_SESSION['apps']);
   unset($_SESSION['apps_default_content']);
   unset($_SESSION['apps_server']);
   unset($_SESSION['apps_manifest']);
+  unset($_SESSION['apps_downloads']);
 }
 
 /**

@@ -297,7 +297,7 @@ function apps_retrieve_app_image($url, $title = FALSE, $alt = FALSE) {
  *TODO: Cache status data and clear on changes to any module status
  */
 function apps_manifest($server) {
-  $manifests = &drupal_static(__function__);
+  $manifests = &drupal_static(__FUNCTION__);
   require_once DRUPAL_ROOT . '/includes/install.inc';
   if (empty($manifests[$server['name']]) && !isset($manifests[$server['name']]['error'])) {
     // Get manifest from server
