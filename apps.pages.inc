@@ -11,10 +11,12 @@ function apps_install_page($server_name) {
   //find all apps
   try {
     $apps = apps_apps($server_name, array(), TRUE);
-    $element['apps'] = $apps;
-    $featured_apps = apps_apps($server_name , array('featured' => TRUE)) ;
-    if(!empty($featured_apps)) {
-      $element['featured_app'] = array_pop($featured_apps);
+    if (!empty($apps)) {
+      $element['apps'] = $apps;
+      $featured_apps = apps_apps($server_name , array('featured' => TRUE)) ;
+      if(!empty($featured_apps)) {
+        $element['featured_app'] = array_pop($featured_apps);
+      }
     }
   }
   catch (Exception $e) {

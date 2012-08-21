@@ -99,10 +99,7 @@ function apps_apps($server, $condition = array(), $add_theme=FALSE) {
       unset($apps[$id]);
     }
   }
-  if (empty($apps)) {
-    $apps = array('#markup' => '<div class="messages">' . t('No applications currently available.') . '</div>');
-  }
-  elseif ($add_theme) {
+  if (!empty($apps) && $add_theme) {
     apps_apps_add_theme($apps);
   }
   return $apps;
