@@ -199,10 +199,10 @@ function apps_install_downloads() {
     else {
       // Set the $_SESSION variables so that authorize form knows what to do after authorization.
       system_authorized_init('apps_run_install', drupal_get_path('module', 'apps') . '/apps.installer.inc', array($updates), t('Update manager'));
-      require_once DRUPAL_ROOT . '/includes/authorize.inc';
+
       // Get the authorize form.
-      $form = drupal_get_form('authorize_filetransfer_form');
-      return $form;
+      require_once DRUPAL_ROOT . '/includes/authorize.inc';
+      return drupal_get_form('authorize_filetransfer_form');
     }
   }
 }

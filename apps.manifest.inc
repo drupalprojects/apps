@@ -5,12 +5,6 @@
  *
  */
 
-define("APPS_ENABLED", 1);
-define("APPS_DISABLED", 0);
-define("APPS_INCOMPATIBLE", -1);
-define("APPS_INSTALLABLE", 2);
-
-
 function apps_server_local($server) {
   $apps = array();
   $infos = system_rebuild_module_data();
