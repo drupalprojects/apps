@@ -248,7 +248,7 @@ function apps_settings_form() {
     '#default_value' => variable_get('apps_allow_voting', TRUE),
   );
   $form = system_settings_form($form);
-  $form['#submit'][] = 'apps_config_form_submit';
+  $form['#submit'][] = 'apps_settings_form_submit';
   return $form;
 }
 
