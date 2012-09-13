@@ -79,8 +79,8 @@ function drush_apps_list() {
   $servers = func_get_args();
   module_load_include('inc', 'apps', 'apps.manifest');
   $servers = !empty($servers)? $servers : array_keys(apps_servers());
-  $rows = array(array(dt('Key'), dt('Name'),dt('version'),dt('server'), dt('status')));
-  foreach($servers as $server) {
+  $rows = array(array(dt('Key'), dt('Name'), dt('version'), dt('server'), dt('status')));
+  foreach ($servers as $server) {
     $apps = apps_apps($server);
     foreach ($apps as $k => $app) {
       $status = '';

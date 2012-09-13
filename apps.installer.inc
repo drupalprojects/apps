@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * installer.inc hold all of the function used to download apps and thier deps
+ */
 
 /**
  * Download all modules and library to a temp location
@@ -25,30 +29,30 @@ function apps_download_apps_batch($apps) {
   foreach ($apps as $app) {
     $downloads = array();
     // find all downloads needed for dependencies
-    foreach($app['dependencies'] as $dep) {
-      if(!$dep['installed']) {
+    foreach ($app['dependencies'] as $dep) {
+      if (!$dep['installed']) {
         $downloads[$dep['downloadable']]['for'][] = $dep['version']['name'];
         $downloads[$dep['downloadable']]['type'] = 'module';
       }
     }
-    foreach($app['libraries'] as $lib) {
-      if(!$lib['installed']) {
+    foreach ($app['libraries'] as $lib) {
+      if (!$lib['installed']) {
         $downloads[$lib['downloadable']]['for'][] = $lib['version']['name'];
         $downloads[$lib['downloadable']]['type'] = 'library';
       }
     }
     // add our core modules download
-    if(!$app['installed']) {
+    if (!$app['installed']) {
       $downloads[$app['downloadable']]['for'][] = $app['machine_name'];
       $downloads[$app['downloadable']]['type'] = 'app';
     }
     //foreach download find the url
-    foreach($downloads as $key => $download) {
+    foreach ($downloads as $key => $download) {
       $downloads[$key]['url'] = $app['downloadables'][$key];
       // do a quick dirty pull of the name from the key
       $downloads[$key]['name'] = ($e = strpos($key, " ")) ? substr($key, 0, $e) : $key;
     }
-    foreach($downloads as $download) {
+    foreach ($downloads as $download) {
       $download_commands[] = array(
         'apps_download_batch',
         array(
@@ -167,7 +171,7 @@ function apps_install_downloads() {
 
     $updates = array();
     $project_types = $_SESSION['update_manager_update_projects'];
-    foreach($project_types as $type => $projects) {
+    foreach ($project_types as $type => $projects) {
       $directory = apps_extract_directory($type);
       foreach ($projects as $project => $url) {
         $project_location = $directory . '/' . $project;
