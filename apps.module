@@ -409,8 +409,14 @@ function apps_hook_info() {
  * @return boolean
  */
 function apps_installer_has_write_access() {
-  $libraries_dir = (is_dir('sites/all/libraries')) ? 'sites/all/libraries' : 'sites/all';
-  return is_writable(drupal_realpath($libraries_dir)) && is_writable(drupal_realpath(APPS_INSTALL_PATH));
+  return is_writable(drupal_realpath(apps_installer_lib_dir())) && is_writable(drupal_realpath(APPS_INSTALL_PATH));
+}
+
+/**
+ * Return the libraries dir to check
+ */
+function apps_installer_lib_dir() {
+  return is_dir('sites/all/libraries') ? 'sites/all/libraries' : 'sites/all';
 }
 
 /**
