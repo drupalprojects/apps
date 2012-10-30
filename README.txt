@@ -92,6 +92,18 @@ writable. In order to do this go to the root of your drupal install and type
 
 sudo chmod 777 sites/all/modules
 
+Additionally you need write access to sites/all/libraries (or if that does not
+exist, then sites/all).  In order to give this access you should go to the root
+of your drupal install and type
+
+sudo chmod 777 sites/all/libraries
+
+If you get an error that sites/all/libraries does not exist, you can either
+create it first and give it the proper permissions or open up the permissions
+on sites/all like so:
+
+sudo chmod 777 sites/all
+
 Be aware that there are security issues with leaving your site in this state.
 
 -- APP UNINSTALL --
