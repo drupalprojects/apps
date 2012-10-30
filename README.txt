@@ -83,7 +83,7 @@ for how to install the ssh2 php extension. You will also need a username and
 password of a user that can ssh into the server and has write permissions to
 your site directory on your server.
 
-Install directly to sites directory
+*Install directly to sites directory*
 
 This is not the preferred method of install and should be a last resort.
 
