@@ -34,11 +34,11 @@ function apps_permission() {
 function apps_menu() {
   $menu["admin/apps"] = array(
     'title' => 'Apps',
-    'description' => t('Install and Manage Apps'),
+    'description' => 'Install and Manage Apps',
     'page callback' => 'apps_market_page',
     'access arguments' => array('administer apps'),
     'weight' => -10,
-    'type'=> MENU_NORMAL_ITEM,
+    'type' => MENU_NORMAL_ITEM,
     'file' => 'apps.pages.inc',
   );
 
@@ -49,13 +49,13 @@ function apps_menu() {
     'page callback' => 'apps_install_page',
     'page arguments' => array(2),
     'access arguments' => array('administer apps'),
-    'type'=> MENU_CALLBACK,
+    'type' => MENU_CALLBACK,
     'file' => 'apps.pages.inc',
   );
   $menu["admin/apps/%apps_server/all"] = array(
     'title' => "All Apps",
     'weight' => 1,
-    'type'=> MENU_DEFAULT_LOCAL_TASK,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $menu["admin/apps/%apps_server/manage"] = array(
     'title' => "Installed Apps",
@@ -63,7 +63,7 @@ function apps_menu() {
     'page arguments' => array(2),
     'access arguments' => array('administer apps'),
     'weight' => 2,
-    'type'=> MENU_LOCAL_TASK,
+    'type' => MENU_LOCAL_TASK,
     'file' => 'apps.pages.inc',
   );
   $menu["admin/apps/%apps_server/update"] = array(
@@ -72,7 +72,7 @@ function apps_menu() {
     'page arguments' => array(2),
     'access arguments' => array('administer apps'),
     'weight' => 3,
-    'type'=> MENU_LOCAL_TASK,
+    'type' => MENU_LOCAL_TASK,
     'file' => 'apps.pages.inc',
   );
 
@@ -91,7 +91,7 @@ function apps_menu() {
   $menu["admin/apps/%apps_app/%/details"] = array(
     'title' => "App Details",
     'weight' => 1,
-    'type'=> MENU_DEFAULT_LOCAL_TASK,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $menu["admin/apps/%apps_app/%/install"] = array(
     'title' => "Install App",
@@ -99,7 +99,7 @@ function apps_menu() {
     'page arguments' => array(2),
     'access callback' => 'apps_app_access',
     'access arguments' => array(2, 'install'),
-    'type'=> MENU_LOCAL_ACTION,
+    'type' => MENU_LOCAL_ACTION,
     'file' => 'apps.pages.inc',
   );
   $menu["admin/apps/%apps_app/%/enable"] = array(
@@ -108,7 +108,7 @@ function apps_menu() {
     'page arguments' => array(2),
     'access callback' => 'apps_app_access',
     'access arguments' => array(2, 'enable'),
-    'type'=> MENU_LOCAL_ACTION,
+    'type' => MENU_LOCAL_ACTION,
     'file' => 'apps.pages.inc',
   );
   $menu["admin/apps/%apps_app/%/disable"] = array(
@@ -117,7 +117,7 @@ function apps_menu() {
     'page arguments' => array(2),
     'access callback' => 'apps_app_access',
     'access arguments' => array(2, 'disable'),
-    'type'=> MENU_LOCAL_ACTION,
+    'type' => MENU_LOCAL_ACTION,
     'file' => 'apps.pages.inc',
   );
   $menu["admin/apps/%apps_app/%/uninstall"] = array(
@@ -126,7 +126,7 @@ function apps_menu() {
     'page arguments' => array(2),
     'access callback' => 'apps_app_access',
     'access arguments' => array(2, 'uninstall'),
-    'type'=> MENU_LOCAL_ACTION,
+    'type' => MENU_LOCAL_ACTION,
     'file' => 'apps.pages.inc',
   );
   $menu["admin/apps/%apps_app/%/configure"] =  array(
@@ -136,7 +136,7 @@ function apps_menu() {
     'access callback' => 'apps_app_access',
     'access arguments' => array(2, 'configure'),
     'weight' => 2,
-    'type'=> MENU_LOCAL_TASK,
+    'type' => MENU_LOCAL_TASK,
     'file' => 'apps.pages.inc',
   );
 
@@ -169,7 +169,7 @@ function apps_menu() {
   // @TODO: Make Voting a separate module. Not everyone wants it.
   $menu['apps/vote/%/%/%'] = array(
     'page callback' => 'apps_vote_for_app',
-    'page arguments' => array(2,3,4),
+    'page arguments' => array(2, 3, 4),
     'type' => MENU_CALLBACK,
     'access arguments' => array('administer apps'),
     'file' => 'apps.voting.inc',
@@ -252,7 +252,7 @@ function apps_theme() {
 function apps_app_access($app, $action = NULL) {
   apps_include('manifest');
   if (user_access('administer apps') && isset($app)) {
-    switch($action) {
+    switch ($action) {
       case 'details':
         return TRUE;
       case 'enable':
@@ -388,7 +388,7 @@ function apps_image_default_styles() {
  */
 function apps_cron() {
   apps_include('manifest');
-  foreach(apps_servers() as $server) {
+  foreach (apps_servers() as $server) {
     return apps_request_manifest($server);
   }
 }
@@ -409,8 +409,14 @@ function apps_hook_info() {
  * @return boolean
  */
 function apps_installer_has_write_access() {
-  $libraries_dir = (is_dir('sites/all/libraries')) ? 'sites/all/libraries' : 'sites/all';
-  return is_writable(drupal_realpath($libraries_dir)) && is_writable(drupal_realpath(APPS_INSTALL_PATH));
+  return is_writable(drupal_realpath(apps_installer_lib_dir())) && is_writable(drupal_realpath(APPS_INSTALL_PATH));
+}
+
+/**
+ * Return the libraries dir to check
+ */
+function apps_installer_lib_dir() {
+  return is_dir('sites/all/libraries') ? 'sites/all/libraries' : 'sites/all';
 }
 
 /**
@@ -438,9 +444,9 @@ function apps_app_load($server_name, $app_name) {
 function apps_block_info() {
   apps_include('manifest');
   $blocks = array();
-  foreach(apps_servers() as $id => $server) {
+  foreach (apps_servers() as $id => $server) {
     $blocks["manage_apps__$id"] = array(
-      'info' => t('Manage Apps for ') . $server['title'],
+      'info' => t('Manage Apps for %server', array('%server' => $server['title'])),
     );
      
   }
