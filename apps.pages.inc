@@ -235,6 +235,12 @@ function apps_app_uninstall($app) {
  */
 function apps_settings_form() {
   $form = array();
+  $form['apps_offline_mode'] = array(
+    '#title' => t('Apps Offline Mode'),
+    '#description' => t('Does not try to make external requests to app servers. Assumes all apps are already locally stored.'),
+    '#type' => 'checkbox',
+    '#default_value'=> variable_get('apps_offline_mode', FALSE),
+  );
   $form['apps_enable_dev_console'] = array(
     '#title' => t('Enable Development Console'),
     '#description' => t('Allows local Apps to be displayed in a development app server.'),
