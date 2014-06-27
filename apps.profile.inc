@@ -445,6 +445,7 @@ function apps_profile_check_dependencies($module_list) {
  * for Apps installs.
  */
 function apps_install_verify() {
+  drupal_set_title(t('Verify Apps support'));
   $form = array();
 
   $form['opening'] = array(
