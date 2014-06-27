@@ -41,7 +41,7 @@ function apps_market_page() {
  * Callback list off all apps
  */
 function apps_install_page($server_name) {
-  apps_include('manifest'); 
+  apps_include('manifest');
   $element = array(
     '#theme'=> 'apps_install_page',
   );
@@ -59,7 +59,7 @@ function apps_install_page($server_name) {
   catch (Exception $e) {
     drupal_set_message(t("There was the following error: @msg", array('@msg' => $e->getMessage())), 'warning');
   }
-  return $element; 
+  return $element;
 }
 
 /**
@@ -270,7 +270,7 @@ function apps_settings_form_submit() {
 /**
  * apps_app_status_report()
  *
- * @PARAM items: an array of items to display the keys of which should be the 
+ * @PARAM items: an array of items to display the keys of which should be the
  * keys of the $header param or use the default.
  * The default are severity, title, description and action.  Severity is expected to be
  * an int in (REQUIREMENT_INFO, REQUIREMENT_OK, REQUIREMENT_WARNING, REQUIREMENT_ERROR)
@@ -321,7 +321,7 @@ function apps_app_status_report($items, $header = NULL) {
         }
         elseif($key == 'action') {
           $row['data'][] = theme('item_list', array("items" => $item[$key]));
-        
+
         }
         else {
           $row['data'][] = $item[$key];

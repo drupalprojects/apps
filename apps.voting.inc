@@ -2,16 +2,16 @@
 define('APPS_VOTING_PATH', '/apps/vote/');
 /**
  *  @file
- *  Adds voting component for Apps.  Each client site will be able to submit one vote, 
+ *  Adds voting component for Apps.  Each client site will be able to submit one vote,
  *  which is tied to their site cliet id.  Has a corresponding file and component in the
  *  Appserver module.
  */
 
 /**
  *  Menu callback - this will be hit via an AJAX call to a menu hook
- *  @param $server is the machine name of the server
- *  @param $app is the machine name of the app
- *  @param $vote is a number between 0 and 100 representing the percentage vote
+ * @param $server is the machine name of the server
+ * @param $app is the machine name of the app
+ * @param $vote is a number between 0 and 100 representing the percentage vote
  */
 function apps_vote_for_app($server, $app, $vote) {
   apps_include('manifest');
@@ -28,7 +28,7 @@ function apps_vote_for_app($server, $app, $vote) {
     $port = isset($parts['port']) ? ':' . $parts['port'] : '';
     $url = $parts['scheme'] . '://' . $parts['host'] . $port;
     $url .= APPS_VOTING_PATH . $app . '/' . $vote;
-    
+
     $result = drupal_http_request($url, array(
       'data' => 'client_id=' . $id,
     ));
@@ -47,7 +47,7 @@ function apps_vote_for_app($server, $app, $vote) {
     else {
       $output = array('error' => 'Server connection failed, vote could not be saved.');
     }
-  } 
+  }
   else {
     $output = array('error' => 'Server URL failed to parse: ' . $url);
   }
@@ -68,12 +68,12 @@ function apps_theme_voting_widget($vars) {
       'average' => 100,
     );
   }
-  
-  $teaser = !empty($vars['app']['teaser']); 
-  
+
+  $teaser = !empty($vars['app']['teaser']);
+
   $server = $vars['app']['server']['name'];
   $mname = $vars['app']['machine_name'];
-  
+
   //retrieve the user's current rating or the defaults
   $app_ratings = variable_get('apps_user_ratings', array());
   $user_rating = isset($app_ratings[$server][$mname]) ? $app_ratings[$server][$mname] : FALSE;
@@ -89,7 +89,7 @@ function apps_theme_voting_widget($vars) {
           'count' => $ratings['count'],
           'stars' => $stars,
           'user' => $user_rating,
-        ), 
+        ),
       ),
     ),
   );
