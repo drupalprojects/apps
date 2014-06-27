@@ -422,10 +422,10 @@ function apps_manifest($server) {
       if (isset($app['libraries'])) {
         $profile = variable_get('install_profile', 'standard');
         $profile_path = drupal_get_path('profile', $profile);
-        foreach($app['libraries'] as $name_version => $downloadable) {
+        foreach ($app['libraries'] as $name_version => $downloadable) {
           $info = array(
             'downloadable' => $downloadable,
-            'version' => array('name'=>$name_version),
+            'version' => array('name' => $name_version),
             'status' => APPS_INSTALLABLE,
             'incompatible' => 0,
             'enabled' => 0,
@@ -496,10 +496,10 @@ function apps_add_app_info(&$apps) {
  */
 function apps_app_callback($app, $key) {
   module_load_include("inc", $app['machine_name'], $app['machine_name'] . ".app");
-  if(isset($app['file'])) {
+  if (isset($app['file'])) {
     require_once $app['file'];
   }
-  if (isset($app[$key]) && module_exists($app['machine_name']) && function_exists($app[$key])){
+  if (isset($app[$key]) && module_exists($app['machine_name']) && function_exists($app[$key])) {
     return $app[$key];
   }
 }
@@ -557,10 +557,13 @@ function apps_demo_content_form($form, &$form_state, $app) {
   $enabled = $cb($app);
   $form['demo_content_group'] = array(
     '#type' => 'fieldset',
-    '#title' => "Demo Content for {$app['name']}",
+    '#title' => t("Demo Content for @app", array('@app' => $app['name'])),
   );
   $form['demo_content_group']['demo_content_current'] = array(
-    '#markup' => $app['demo content description'] . " <i>Demo content for {$app['name']} is currently " . ($enabled ? 'enabled' : 'disabled') . ".</i><br /><br />",
+    '#markup' => filter_xss($app['demo content description'])
+      . " <i>"
+      . t("Demo content for @app is currently !state",  array('@app' => $app['name'], '!state' => ($enabled ? t('enabled') : t('disabled'))))
+      . ".</i><br /><br />",
   );
   $form['demo_content_action'] = array(
     '#type' => 'value',
@@ -593,14 +596,14 @@ function apps_demo_content_form_submit($form, &$form_state) {
      $cb = apps_app_callback($app, 'demo content enable callback');
      $success = $cb($app);
      if ($success) {
-       drupal_set_message("Enabled demo content for {$app['name']}");
+       drupal_set_message(t("Enabled demo content for @app", array('@app' => $app['name'])));
      }
   }
   else {
      $cb = apps_app_callback($app, 'demo content disable callback');
      $success = $cb($app);
      if ($success) {
-       drupal_set_message("Disabled demo content for {$app['name']}");
+       drupal_set_message(t("Disabled demo content for  @app", array('@app' => $app['name'])));
      }
   }
 }

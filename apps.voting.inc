@@ -1,11 +1,11 @@
 <?php
-define('APPS_VOTING_PATH', '/apps/vote/');
 /**
  *  @file
  *  Adds voting component for Apps.  Each client site will be able to submit one vote,
  *  which is tied to their site cliet id.  Has a corresponding file and component in the
  *  Appserver module.
  */
+define('APPS_VOTING_PATH', '/apps/vote/');
 
 /**
  *  Menu callback - this will be hit via an AJAX call to a menu hook
@@ -62,7 +62,8 @@ function apps_vote_for_app($server, $app, $vote) {
 function apps_theme_voting_widget($vars) {
   if (!empty($vars['app']['rating'])) {
     $ratings = $vars['app']['rating'];
-  } else {
+  }
+  else {
     $ratings = array(
       'count' => 0,
       'average' => 100,
@@ -84,7 +85,7 @@ function apps_theme_voting_widget($vars) {
     'apps' => array(
       $mname => array(
         'url' => '/apps/vote/' . $server . '/' . $mname . '/',
-        'rating' => array (
+        'rating' => array(
           'average' => $ratings['average'],
           'count' => $ratings['count'],
           'stars' => $stars,
@@ -96,11 +97,11 @@ function apps_theme_voting_widget($vars) {
   // check if there is a vote for this app already - otherwise hide the label until there is.
   $hasvote = ($user_rating === FALSE) ? 'no-vote' : '';
 
-  $render_arr = array (
+  $render_arr = array(
     '#prefix' => '<div class="app-rating clearfix" id="app-rating-' . $vars['app']['machine_name'] . '">',
     'rating' => array(
       '#prefix' => '<div class="app-stars-holder" title="' . $stars . '">',
-      '#markup' => '<span class="app-stars" style="width:'. $ratings['average'] . '%"></span>',
+      '#markup' => '<span class="app-stars" style="width:' . $ratings['average'] . '%"></span>',
       '#suffix' => '</div>'
     ),
     'numratings' => array(

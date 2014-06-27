@@ -1,5 +1,8 @@
 <?php
 /**
+ * @file
+ * The install functions for the Apps module.
+ *
  * This file handles all the functions for downloading, transferring and
  * installing apps during the install process.
  */
@@ -91,12 +94,12 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
 
   // Set a message if no manifest received.
   if (!isset($_SESSION['apps_manifest'])) {
-    drupal_set_message('<b>Unable to contact Apps Server.</b><br> For some reason we were unable to contact the apps server.', 'error');
+    drupal_set_message(t('<b>Unable to contact Apps Server.</b><br> For some reason we were unable to contact the apps server.'), 'error');
   }
   else {
     drupal_set_title(apps_profile_get_server_name($_SESSION['apps_server']));
     $form['actions'] = array('#type' => 'actions', '#weight' => 3);
-    foreach($_SESSION['apps_manifest'] as $name => $app) {
+    foreach ($_SESSION['apps_manifest'] as $name => $app) {
       if ($name != '#theme') {
         $options[$name] = '<strong>' . $app['name'] . '</strong>';
         if (isset($app['description'])) {
@@ -116,7 +119,7 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
       '#collapsible' => FALSE,
     );
     $form['apps_fieldset']['apps'] = array(
-      '#type' =>'checkboxes',
+      '#type' => 'checkboxes',
       '#title' => t('Apps'),
       '#default_value' => $_SESSION['apps_server']['default apps'],
       '#options' => $options,
@@ -192,6 +195,7 @@ function apps_profile_download_batch_finished($success, $results) {
       'title' => t('Downloading updates failed:'),
       'items' => $results['errors'],
     );
+    // @ignore security_2
     drupal_set_message(theme('item_list', $error_list), 'error');
   }
   elseif ($success) {
@@ -242,7 +246,7 @@ function apps_profile_install_app_modules(&$install_state) {
 
     $updates = array();
     $project_types = $_SESSION['update_manager_update_projects'];
-    foreach($project_types as $type => $projects) {
+    foreach ($project_types as $type => $projects) {
       $directory = apps_extract_directory($type);
       foreach ($projects as $project => $url) {
         $project_location = $directory . '/' . $project;
@@ -319,7 +323,7 @@ function apps_profile_enable_app_modules(&$install_state) {
     }
   }
   // Do dependency checking so everything doesn't break from one missing dependency.
-  foreach($modules as $id => $module) {
+  foreach ($modules as $id => $module) {
     if (!apps_profile_check_dependencies(array($module => $module))) {
       // Something went wrong. Remove from queue and add error.
       unset($modules[$id]);
@@ -331,7 +335,7 @@ function apps_profile_enable_app_modules(&$install_state) {
   if (!empty($modules)) {
     // Setup the batch comments
     $enable_commands = array();
-    foreach($modules as $module) {
+    foreach ($modules as $module) {
       $module_info = system_get_info('module', $module);
       $module_name = isset($module_info['name']) ? $module_info['name'] : $module;
       $enable_commands[] = array('app_profile_enable_module', array($module, $module_name));
@@ -379,9 +383,10 @@ function apps_profile_enable_app_modules_finished($success, $results) {
       'title' => t('Enabling apps failed:'),
       'items' => $results['errors'],
     );
+    // @ignore security_2
     drupal_set_message(theme('item_list', $error_list), 'error');
   }
-  elseif(!$success) {
+  elseif (!$success) {
     // Ideally we're catching all Exceptions, so they should never see this,
     // but just in case, we have to tell them something.
     drupal_set_message(t('Fatal error trying to enable apps.'), 'error');
@@ -529,6 +534,7 @@ function apps_install_verify_process($form) {
         $form[$key]['#collapsed'] = FALSE;
       }
     }
+    // @ignore security_3
     drupal_set_message(t('No app install methods were found. <a href="!url">Retry verification</a>', array('!url' => check_url(drupal_current_script_url()))), 'warning');
   }
   return $form;

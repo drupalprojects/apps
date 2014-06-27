@@ -16,7 +16,7 @@
   </div>
   <div class="app-main">
     <div id="app-top">
-      <?php if($logo): ?>
+      <?php if ($logo): ?>
         <div class = 'app-logo-small'>
           <?php print $logo ?>
         </div>
@@ -28,7 +28,7 @@
       <h2><?php print $description_title; ?></h2>
       <?php print $description ?>
     </div>
-    <?php if($screenshot): ?>
+    <?php if ($screenshot): ?>
       <div class = 'app-screenshot'><?php print $screenshot ?><div class="screenshot-shadow"></div></div>
     <?php endif; ?>
   </div>
