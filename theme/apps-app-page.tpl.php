@@ -2,7 +2,7 @@
   <div id="sidebar">
     <h2><?php print $author_title; ?></h2>
     <div class = 'app-author'><?php print $author ?></div>
-    
+
     <h2><?php print $version_title; ?></h2>
     <div class = 'app-version'><?php print $version ?></div>
 
@@ -43,8 +43,3 @@
 
   </div>
 </div>
- 
-
-
-
-

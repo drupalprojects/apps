@@ -23,7 +23,7 @@ function theme_apps_list($vars) {
  * Implements hook_preprocess_apps_app_teaser().
  */
 function apps_preprocess_apps_app_teaser(&$vars) {
-  
+
   apps_include('pages');
   $link = apps_app_page_path($vars['app']);
   $vars['name'] = l($vars['app']['name'], $link);
@@ -44,14 +44,14 @@ function apps_preprocess_apps_app_teaser(&$vars) {
         'available'
       )
     );
-  
+
   //add rating information for theming
   $vars['app']['teaser'] = TRUE;
 
   if (variable_get('apps_allow_voting', FALSE)) {
     $vars['rating'] = theme('apps_voting_widget', $vars['app']);
   }
-  
+
   //action link
   $vars['action'] = l(t('Details'), $link);
 }
@@ -69,8 +69,8 @@ function apps_preprocess_apps_app_page(&$vars) {
     $vars['app']['logo']['style_name']= 'apps_logo_small';
     $vars['logo'] = theme('image_style', $vars['app']['logo']);
   }
-   
-    
+
+
   if (isset($vars['app']['screenshots'][0])) {
     $vars['app']['screenshots'][0]['style_name'] = 'apps_screenshot';
     $vars['screenshot'] = theme('image_style', $vars['app']['screenshots'][0]);
@@ -129,7 +129,6 @@ function apps_preprocess_apps_app_page(&$vars) {
   }
 }
 
-
 /**
  * Implements hook_preprocess_apps_app_featured().
  */
@@ -167,7 +166,6 @@ function apps_preprocess_apps_install_page(&$vars) {
 function apps_preprocess_apps_manage_page(&$vars) {
   drupal_add_css(drupal_get_path('module', 'apps') . '/theme/css/apps.css');
 }
-
 
 /**
  * Implements hook_preprocess_apps_update_page().
