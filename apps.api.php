@@ -113,6 +113,10 @@ function hook_install_tasks($install_state) {
 
 /**
  * This is the structure of the json manifest.
+ *
+ * A local app can also be defined using the info file in the form:
+ *  apps[name] = App name.
+ * The same keys and information used below can be used for local apps.
  */
 
 $js = <<<JS
@@ -156,6 +160,10 @@ $js = <<<JS
       // keys used in the downloadables hash later in the manifest.
       "libraries": {
         "jquery_ideation": "jquery_ideation 1.0"
+      }
+      // Define conflicts that this app has with other apps.
+      "conflicts": {
+        "app_machine": "app_machine"
       }
       // A hash of resources to be downloaded. The key is used else where in the manifest. The value
       // should be a url to a publicly downloadable archive (tar gz zip)
