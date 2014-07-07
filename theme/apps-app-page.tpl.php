@@ -15,6 +15,7 @@
     <?php endif; ?>
   </div>
   <div class="app-main">
+
     <div id="app-top">
       <?php if ($logo): ?>
         <div class = 'app-logo-small'>
@@ -23,14 +24,23 @@
       <?php endif; ?>
       <h1><?php print $name ?></h1>
     </div>
-    
+
     <div class = 'app-description'>
       <h2><?php print $description_title; ?></h2>
       <?php print $description ?>
     </div>
+
     <?php if ($screenshot): ?>
       <div class = 'app-screenshot'><?php print $screenshot ?><div class="screenshot-shadow"></div></div>
     <?php endif; ?>
+
+    <?php if (!empty($conflicts)): ?>
+      <div class = 'app-conflicts'>
+        <h2><?php print $conflicts_title; ?></h2>
+        <?php print $conflicts ?>
+      </div>
+    <?php endif; ?>
+
   </div>
 </div>
  

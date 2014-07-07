@@ -386,6 +386,7 @@ function apps_manifest($server) {
       $app['server'] = $server;
       $app['dependencies'] = isset($app['dependencies']) ? $app['dependencies'] : array();
       $app['libraries'] = isset($app['libraries']) ? $app['libraries'] : array();
+      $app['conflicts'] = isset($app['conflicts']) ? $app['conflicts'] : array();
       // Add info to dependencies
       foreach ($app['dependencies'] as $name_version => $downloadable) {
         //Parse dep versions
@@ -477,6 +478,20 @@ function apps_add_app_info(&$apps) {
         'demo content enable callback' => 'apps_demo_content_enable',
         'demo content disable callback' => 'apps_demo_content_disable',
       );
+    }
+    // Turn conflicts into array('server' => 'server', name => 'name') as needed.
+    foreach ($app['conflicts'] as $conflict_key => $conflict) {
+      if (is_string($conflict) && strpos($conflict, ' ')) {
+        $conflict = explode(' ', $conflict);
+        $apps[$id]['conflicts'][$conflict_key] = array('server' => $conflict[0], 'name' => $conflict[1]);
+      }
+      elseif (is_string($conflict)) {
+        $apps[$id]['conflicts'][$conflict_key] = array('name' => $conflict);
+      }
+      // Set server to this app's server if empty
+      if (empty($apps[$id]['conflicts'][$conflict_key]['server'])) {
+        $apps[$id]['conflicts'][$conflict_key]['server'] = $app['server']['name'];
+      }
     }
   }
   if ($set_cache) {

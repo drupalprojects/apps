@@ -63,7 +63,7 @@ function apps_preprocess_apps_app_page(&$vars) {
   // First do everything we do in the teaser.
   drupal_add_css(drupal_get_path('module', 'apps') . '/theme/css/apps.css');
   apps_preprocess_apps_app_teaser($vars);
-  
+
   // We need some special stuff for the logo here.
   if (!empty($vars['app']['logo']) && $vars['app']['logo']) {
     $vars['app']['logo']['style_name']= 'apps_logo_small';
@@ -78,7 +78,7 @@ function apps_preprocess_apps_app_page(&$vars) {
   else {
     $vars['screenshot'] = FALSE;
   }
-  
+
   $vars['description'] = $vars['app']['description'];
   $vars['name'] = $vars['app']['name'];
   $vars['author'] = l($vars['app']['author'], $vars['app']['author_url']);
@@ -100,7 +100,7 @@ function apps_preprocess_apps_app_page(&$vars) {
     }
     $vars['status'] = $incompatible_message;
   }
-  
+
   //Title texts for App Detail Page
   $vars['author_title'] = t('Author');
   $vars['version_title'] = t('Version');
@@ -113,6 +113,19 @@ function apps_preprocess_apps_app_page(&$vars) {
     //Override the rating key with the full widget
     $vars['rating_caption'] = t('Average rating for this version:');
     $vars['rating'] = theme('apps_voting_widget', $vars['app']);
+  }
+
+  if ($conflicts = apps_app_find_conflicts($vars['app'])) {
+    $vars['conflicts_title'] = t('Conflicts');
+    $conflicts = array();
+    foreach (apps_app_find_conflicts($vars['app']) as $conflict) {
+      if ($conflict_app = apps_app_load($conflict['server'], $conflict['name'])) {
+        $conflicts[] = l($conflict_app['name'], 'admin/apps/' . $conflict['server'] . '/' . $conflict['name']);
+      }
+    }
+    if ($conflicts) {
+      $vars['conflicts'] = implode(', ', $conflicts);
+    }
   }
 }
 

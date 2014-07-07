@@ -75,13 +75,20 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
   apps_include('manifest');
 
   // If there is no internet things get in an unfixable state. Use try->catch
-  try {
-    $apps_server = $_SESSION['apps_servers'][$install_state['active_task']];
-
-    $_SESSION['apps_server'] = $apps_server;
-    $_SESSION['apps_manifest'] = apps_apps($apps_server['machine name']);
+  if (empty($_SESSION['apps_manifest']) || empty($_SESSION['apps_server'])) {
+    try {
+      if ($apps_server = $_SESSION['apps_servers'][$install_state['active_task']]) {
+        $_SESSION['apps_server'] = $apps_server;
+        $_SESSION['apps_manifest'] = apps_apps($apps_server['machine name']);
+      }
+    }
+    catch (Exception $e) {
+      // This condition is handled in right below.
+    }
   }
-  catch (Exception $e) {
+
+  // Set a message if no manifest or internet problems.
+  if (empty($_SESSION['apps_manifest'])) {
     $form['info'] = array(
       '#markup' => t('<h2>Error</h2><p>Unable to connect to Apps Server.</p><p>Click "Continue" to finish the installation. You can either fix your internet connection and try the installation again or install apps later from the apps config page.</p>'),
     );
@@ -92,56 +99,50 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
     return $form;
   }
 
-  // Set a message if no manifest received.
-  if (!isset($_SESSION['apps_manifest'])) {
-    drupal_set_message(t('<b>Unable to contact Apps Server.</b><br> For some reason we were unable to contact the apps server.'), 'error');
-  }
-  else {
-    drupal_set_title(apps_profile_get_server_name($_SESSION['apps_server']));
-    $form['actions'] = array('#type' => 'actions', '#weight' => 3);
-    foreach ($_SESSION['apps_manifest'] as $name => $app) {
-      if ($name != '#theme') {
-        $options[$name] = '<strong>' . $app['name'] . '</strong>';
-        if (isset($app['description'])) {
-          $options[$name] .= '<br>' . $app['description'];
-        }
+  drupal_set_title(apps_profile_get_server_name($_SESSION['apps_server']));
+  $form['actions'] = array('#type' => 'actions', '#weight' => 3);
+  foreach ($_SESSION['apps_manifest'] as $name => $app) {
+    if ($name != '#theme') {
+      $options[$name] = '<strong>' . $app['name'] . '</strong>';
+      if (isset($app['description'])) {
+        $options[$name] .= '<br>' . $app['description'];
       }
     }
-    $form = array();
-
-    $form['apps_message'] = array(
-      '#markup' => t('<h2>Apps</h2><p>Apps are the next generation in usability for Drupal. They contain bundles of functionality for your website. Select any apps you want to install right now. You can add more later on the apps page.</p></p>In order to install apps, you must be able to FTP or SSH into your server. This uses the same process as the update module.</p>'),
-    );
-
-    $form['apps_fieldset'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Select Apps To Install'),
-      '#collapsible' => FALSE,
-    );
-    $form['apps_fieldset']['apps'] = array(
-      '#type' => 'checkboxes',
-      '#title' => t('Apps'),
-      '#default_value' => $_SESSION['apps_server']['default apps'],
-      '#options' => $options,
-    );
-
-    $form['default_content_fieldset'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Default Content'),
-      '#collapsible' => FALSE,
-    );
-    $form['default_content_fieldset']['default_content'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Install default content'),
-      '#default_value' => TRUE,
-      '#description' => t('By selecting this box default content will be installed for each app. Without default content the site may look empty before you start adding to it. You can remove the default content later by going to the apps config page.'),
-    );
-
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Install Apps'),
-    );
   }
+  $form = array();
+
+  $form['apps_message'] = array(
+    '#markup' => t('<h2>Apps</h2><p>Apps are the next generation in usability for Drupal. They contain bundles of functionality for your website. Select any apps you want to install right now. You can add more later on the apps page.</p></p>In order to install apps, you must be able to FTP or SSH into your server. This uses the same process as the update module.</p>'),
+  );
+
+  $form['apps_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Select Apps To Install'),
+    '#collapsible' => FALSE,
+  );
+  $form['apps_fieldset']['apps'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Apps'),
+    '#default_value' => $_SESSION['apps_server']['default apps'],
+    '#options' => $options,
+  );
+
+  $form['default_content_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Default Content'),
+    '#collapsible' => FALSE,
+  );
+  $form['default_content_fieldset']['default_content'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Install default content'),
+    '#default_value' => TRUE,
+    '#description' => t('By selecting this box default content will be installed for each app. Without default content the site may look empty before you start adding to it. You can remove the default content later by going to the apps config page.'),
+  );
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Install Apps'),
+  );
   $form['actions']['skip'] = array(
     '#type' => 'submit',
     '#value' => t('Skip this step'),
@@ -149,6 +150,36 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
   drupal_add_css("#apps-profile-apps-select-form .form-submit { display:inline; }", array('type' => 'inline'));
 
   return $form;
+}
+
+/**
+ * Validate function for apps_profile_apps_select_form.
+ */
+function apps_profile_apps_select_form_validate($form, &$form_state) {
+  if (empty($form_state['values']['op']) || $form_state['values']['op'] == t('Install Apps')) {
+    // See if any the apps conflict with each other and cannot be used togeather.
+    $apps = array_filter($form_state['values']['apps']);
+    foreach ($apps as $app_name) {
+      $app = $_SESSION['apps_manifest'][$app_name];
+      if (!empty($app['conflicts'])) {
+        $app_conflicts = array();
+        // Find any apps that would conflict with apps of this server.
+        foreach ($app['conflicts'] as $conflict) {
+          if ($conflict['server'] == $_SESSION['apps_server']['machine name']) {
+            $app_conflicts[] = $conflict['name'];
+          }
+        }
+        // Error out if conflicting apps were selected.
+        if (($conflicts = array_intersect($app_conflicts, $apps))) {
+          $names = array();
+          foreach ($conflicts as $conflict) {
+            $names[] = $_SESSION['apps_manifest'][$conflict]['name'] . ' (' . $conflict . ')';
+          }
+          form_set_error('apps', t('Conflict found with @app (@machine), not compatible with @apps', array('@app' => $app['name'], '@apps' => implode(', ', $names), '@machine' => $app_name)));
+        }
+      }
+    }
+  }
 }
 
 /**
