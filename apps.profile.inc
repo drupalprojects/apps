@@ -92,6 +92,9 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
     $form['info'] = array(
       '#markup' => t('<h2>Error</h2><p>Unable to connect to Apps Server.</p><p>Click "Continue" to finish the installation. You can either fix your internet connection and try the installation again or install apps later from the apps config page.</p>'),
     );
+    $form['actions'] = array(
+      '#type' => 'actions',
+    );
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Continue'),
@@ -139,6 +142,9 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
     '#description' => t('By selecting this box default content will be installed for each app. Without default content the site may look empty before you start adding to it. You can remove the default content later by going to the apps config page.'),
   );
 
+   $form['actions'] = array(
+     '#type' => 'actions',
+   );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Install Apps'),
@@ -544,7 +550,11 @@ function apps_install_verify() {
 
   $form['#process'] = array('apps_install_verify_process');
 
-  $form['continue'] = array(
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+
+  $form['actions']['continue'] = array(
     '#type' => 'submit',
     '#value' => t('Continue'),
     '#weight' => 20,
