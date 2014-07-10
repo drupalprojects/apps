@@ -395,7 +395,7 @@ function apps_manifest($server) {
 
         //check status of modules
         $current = isset($modules[$name]) ? $modules[$name] : FALSE;
-        $incompatible = $current ? (bool) drupal_check_incompatibility($version, $current->info['version']) : FALSE;
+        $incompatible = $current ? (bool) drupal_check_incompatibility($version, str_replace(DRUPAL_CORE_COMPATIBILITY . '-', '', $current->info['version'])) : FALSE;
         $installed = (bool) $current;
         $enabled = $current && $current->status;
         $status = $incompatible ? APPS_INCOMPATIBLE : (!$installed ? APPS_INSTALLABLE : ($enabled ? APPS_ENABLED : APPS_DISABLED));
