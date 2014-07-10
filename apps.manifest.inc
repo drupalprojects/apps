@@ -492,6 +492,11 @@ function apps_add_app_info(&$apps) {
       if (empty($apps[$id]['conflicts'][$conflict_key]['server'])) {
         $apps[$id]['conflicts'][$conflict_key]['server'] = $app['server']['name'];
       }
+      // Mark as incompatible if enabled conflict.
+      // Not checking other servers due to risk of timing issues/endless loop.
+      if ($apps[$id]['conflicts'][$conflict_key]['server'] == $app['server']['name'] && !empty($apps[$app['server']['name']]) && $apps[$app['server']['name']]['status'] == APPS_ENABLED) {
+        $apps[$id]['status'] = APPS_INCOMPATIBLE;
+      }
     }
   }
   if ($set_cache) {

@@ -25,6 +25,13 @@
       <h1><?php print $name ?></h1>
     </div>
 
+    <?php if (!empty($status_title)): ?>
+    <div class = 'app-status'>
+      <h2><?php print $status_title; ?></h2>
+      <?php print $status ?>
+    </div>
+    <?php endif; ?>
+
     <div class = 'app-description'>
       <h2><?php print $description_title; ?></h2>
       <?php print $description ?>

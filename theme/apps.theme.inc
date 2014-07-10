@@ -83,6 +83,25 @@ function apps_preprocess_apps_app_page(&$vars) {
   $vars['name'] = $vars['app']['name'];
   $vars['author'] = l($vars['app']['author'], $vars['app']['author_url']);
   $vars['version'] = $vars['app']['version'];
+
+  $conflicts_enabled = array();
+  if ($conflicts = apps_app_find_conflicts($vars['app'])) {
+    $vars['conflicts_title'] = t('Conflicts');
+    $conflicts = array();
+    foreach (apps_app_find_conflicts($vars['app']) as $conflict) {
+      if ($conflict_app = apps_app_load($conflict['server'], $conflict['name'])) {
+        $enabled = $conflict_app['status'] == APPS_ENABLED;
+        $conflicts[] = l($conflict_app['name'] . ($enabled ? ' (enabled)' : ''), 'admin/apps/' . $conflict['server'] . '/' . $conflict['name']);
+        if ($enabled) {
+          $conflicts_enabled[] = $conflict_app['name'];
+        }
+      }
+    }
+    if ($conflicts) {
+      $vars['conflicts'] = implode(', ', $conflicts);
+    }
+  }
+
   if ($vars['app']['status'] === APPS_INCOMPATIBLE) {
     $incompatible_deps = array();
     $incompatible_message = '';
@@ -92,13 +111,17 @@ function apps_preprocess_apps_app_page(&$vars) {
       }
     }
     if (!empty($incompatible_deps)) {
-      $incompatible_message = "Incompatible - requires " . implode(", ", $incompatible_deps);
+      $incompatible_message = t("Incompatible - requires @deps.", array('@deps' => implode(", ", $incompatible_deps)));
     }
     else {
       //this should never run
-      $incompatible_message = "Incompatible with current install";
+      $incompatible_message = t('Incompatible with current install.');
+    }
+    if ($conflicts_enabled) {
+      $incompatible_message = ($incompatible_message ? $incompatible_message . ' ' : '') . t('Conflicts with enabled @apps', array('@apps' => implode(", ", $conflicts_enabled)));
     }
     $vars['status'] = $incompatible_message;
+    $vars['status_title'] = t('Status');
   }
 
   //Title texts for App Detail Page
@@ -113,19 +136,6 @@ function apps_preprocess_apps_app_page(&$vars) {
     //Override the rating key with the full widget
     $vars['rating_caption'] = t('Average rating for this version:');
     $vars['rating'] = theme('apps_voting_widget', $vars['app']);
-  }
-
-  if ($conflicts = apps_app_find_conflicts($vars['app'])) {
-    $vars['conflicts_title'] = t('Conflicts');
-    $conflicts = array();
-    foreach (apps_app_find_conflicts($vars['app']) as $conflict) {
-      if ($conflict_app = apps_app_load($conflict['server'], $conflict['name'])) {
-        $conflicts[] = l($conflict_app['name'], 'admin/apps/' . $conflict['server'] . '/' . $conflict['name']);
-      }
-    }
-    if ($conflicts) {
-      $vars['conflicts'] = implode(', ', $conflicts);
-    }
   }
 }
 
