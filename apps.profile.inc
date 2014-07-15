@@ -352,13 +352,6 @@ function apps_profile_enable_app_modules(&$install_state) {
 
   $modules = array_keys($_SESSION['apps']);
 
-  // Allow profiles to add default content.
-  if (isset($_SESSION['apps_default_content']) && isset($_SESSION['apps_server']['default content callback'])) {
-    $function = $_SESSION['apps_server']['default content callback'];
-    if (function_exists($function)) {
-      $function($modules);
-    }
-  }
   // Do dependency checking so everything doesn't break from one missing dependency.
   foreach ($modules as $id => $module) {
     if (!apps_profile_check_dependencies(array($module => $module))) {
@@ -404,6 +397,9 @@ function app_profile_enable_module($module, $module_name, &$context) {
   if (!module_enable(array($module))) {
     $context['results']['errors'][$module] = t('There was an error enabling @module app.', array('@module' => $module_name));
   }
+  else {
+    $context['results']['enabled modules'][] = $module;
+  }
 
   // Successful outcome
   $context['finished'] = TRUE;
@@ -429,6 +425,13 @@ function apps_profile_enable_app_modules_finished($success, $results) {
     drupal_set_message(t('Fatal error trying to enable apps.'), 'error');
   }
 
+  // Allow profiles to add default content.
+  if (isset($_SESSION['apps_default_content']) && isset($_SESSION['apps_server']['default content callback']) && !empty($results['enabled modules'])) {
+    $function = $_SESSION['apps_server']['default content callback'];
+    if (function_exists($function)) {
+      $function($results['enabled modules']);
+    }
+  }
   // Do a little cleanup
   // We cannot unset $_SESSION['apps'] here because it is used in the
   // run check for this task and can cause weird interactions with
