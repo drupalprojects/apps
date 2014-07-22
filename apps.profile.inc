@@ -426,7 +426,7 @@ function apps_profile_enable_app_modules_finished($success, $results) {
   }
 
   // Allow profiles to add default content.
-  if (isset($_SESSION['apps_default_content']) && isset($_SESSION['apps_server']['default content callback']) && !empty($results['enabled modules'])) {
+  if (!empty($_SESSION['apps_default_content']) && isset($_SESSION['apps_server']['default content callback']) && !empty($results['enabled modules'])) {
     $function = $_SESSION['apps_server']['default content callback'];
     if (function_exists($function)) {
       $function($results['enabled modules']);
