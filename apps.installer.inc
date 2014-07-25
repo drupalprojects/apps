@@ -128,6 +128,17 @@ function apps_download_batch($project, $url, $type, &$context) {
     $context['results']['errors'][$project] = $e->getMessage();
     return;
   }
+  // Update might not have been extracted to directory named after project.
+  // Github for example extracts to [project name]-[release version].
+  if (!is_dir("$extract_directory/$project")) {
+     foreach (scandir("$extract_directory") as $file) {
+      // Hopefully this is the directory, so move it to project directory for
+      // update module.
+      if ($file != '.' && $file != '..' && is_dir("$extract_directory/$file") && strpos($file, $project) === 0) {
+        rename("$extract_directory/$file", "$extract_directory/$project");
+      }
+    }
+  }
 
   // Verify it.
   $archive_errors = update_manager_archive_verify($project, $local_cache, $extract_directory);
