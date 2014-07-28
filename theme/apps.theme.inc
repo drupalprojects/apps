@@ -71,9 +71,12 @@ function apps_preprocess_apps_app_page(&$vars) {
   }
 
 
-  if (isset($vars['app']['screenshots'][0])) {
-    $vars['app']['screenshots'][0]['style_name'] = 'apps_screenshot';
-    $vars['screenshot'] = theme('image_style', $vars['app']['screenshots'][0]);
+  if (isset($vars['app']['screenshots'])) {
+    $vars['screenshot'] = '';
+    foreach ($vars['app']['screenshots'] as $screenshot) {
+      $screenshot['style_name'] = 'apps_screenshot';
+      $vars['screenshot'] .= l(theme('image_style', $screenshot), file_create_url($screenshot['uri']), array('html' => TRUE, 'attributes' => array('class' => 'colorbox')));
+    }
   }
   else {
     $vars['screenshot'] = FALSE;
