@@ -40,6 +40,11 @@ function hook_apps_app_info() {
     // This will be called after the app is enabled initially or when the app
     // has been uninstalled.
     'status callback' => 'appname_app_status',
+    // This will provide permission configuration on the configre form.
+    // This will also set the permissions on install of the app.
+    'permissions' => array(
+      'access my app' => array('role 1', 'role 2'),
+    ),
   );
   /*
   This callback is used to render a status table on the config page.

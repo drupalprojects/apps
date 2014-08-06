@@ -134,6 +134,25 @@ function apps_apps($server, $condition = array(), $add_theme = FALSE) {
 }
 
 /**
+ * Retrieve apps from all servers.
+ *
+ * @param arrray $condition
+ *   An array of key/values to filter the apps
+ * @param bool $add_theme
+ *   If TRUE apps_apps_add_theme will be called when done getting apps
+ *
+ * @return array
+ *   An array of app info arrays
+ */
+function apps_apps_all($condition = array(), $add_theme = FALSE) {
+  $apps = array();
+  foreach (apps_servers() as $app_server) {
+    $apps = array_merge($apps, apps_apps($app_server, $condition, $add_theme));
+  }
+  return $apps;
+}
+
+/**
  * Changes the apps array by reference.
  *
  * Adds #theme properties for a list view of the apps.

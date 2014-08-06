@@ -276,7 +276,11 @@ function apps_app_access($app, $action = NULL) {
         return $app['status'] === APPS_ENABLED;
 
       case 'configure':
-        return (bool) apps_app_callback($app, "configure form") || apps_app_callback($app, "demo content enabled callback");
+        return (bool)
+          apps_app_callback($app, "configure form") ||
+          apps_app_callback($app, "demo content enabled callback") ||
+          apps_app_callback($app, "status callback") ||
+          !empty($app['permissions']);
 
       case 'uninstall':
         return $app['disabled'];
@@ -486,6 +490,17 @@ function apps_app_load($server_name, $app_name) {
 }
 
 /**
+ * Path object loader for an App via machine name only.
+ *
+ * This assumes there is only one app of that machine name.
+ */
+function apps_app_module_name_load($app_name) {
+  apps_include('manifest');
+  $app = apps_apps_all(array('machine_name' => $app_name));
+  return !empty($app[$app_name]) ? $app[$app_name] : FALSE;
+}
+
+/**
  * Implements hook_block_info().
  */
 function apps_block_info() {
@@ -546,4 +561,37 @@ function apps_updater_info() {
       'weight' => -10,
     ),
   );
+}
+
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function openpublic_modules_enabled($modules) {
+  foreach ($modules as $module_name) {
+    if ($app = apps_app_module_name_load($module_name)) {
+      apps_app_configure_permissions($app);
+    }
+  }
+}
+
+/**
+ * Set the permissions for a role.
+ *
+ * @param $app
+ *   A fully loaded app object.
+ */
+function apps_app_configure_permissions($app) {
+  if (!empty($app['permissions'])) {
+    $roles_to_permissions = array();
+    $roles = user_roles();
+    foreach ($roles as $rid => $role_name) {
+      foreach ($app['permissions'] as $perm_name => $default_roles) {
+        $roles_to_permissions[$rid][$perm_name] = in_array($role_name, $default_roles);
+      }
+    }
+    foreach ($roles_to_permissions as $rid => $permissions) {
+      user_role_change_permissions($rid, $permissions);
+    }
+  }
 }
