@@ -582,12 +582,23 @@ function openpublic_modules_enabled($modules) {
  *   A fully loaded app object.
  */
 function apps_app_configure_permissions($app) {
+  node_types_rebuild();
+  $modules = user_permission_get_modules();
   if (!empty($app['permissions'])) {
     $roles_to_permissions = array();
     $roles = user_roles();
+    $warned = array();
     foreach ($roles as $rid => $role_name) {
       foreach ($app['permissions'] as $perm_name => $default_roles) {
-        $roles_to_permissions[$rid][$perm_name] = in_array($role_name, $default_roles);
+        if (empty($modules[$perm_name]) && empty($warned[$perm_name])) {
+          $warned[$perm_name] = TRUE;
+          $args = array('!name' => $perm_name, '!module' => $app['machine_name']);
+          $msg = t('Warning in apps configuration of !module. No module defines permission "!name".', $args);
+          drupal_set_message($msg, 'warning');
+        }
+        else {
+          $roles_to_permissions[$rid][$perm_name] = in_array($role_name, $default_roles);
+        }
       }
     }
     foreach ($roles_to_permissions as $rid => $permissions) {

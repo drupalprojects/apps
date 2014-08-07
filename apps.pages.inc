@@ -144,6 +144,7 @@ function apps_admin_permissions($form, $form_state, $app) {
   );
   $permissions = module_invoke_all('permission');
   $hide_descriptions = system_admin_compact_mode();
+  $options = array();
 
   foreach ($app['permissions'] as $perm => $default_roles) {
     if (!empty($permissions[$perm])) {
