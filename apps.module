@@ -563,15 +563,27 @@ function apps_updater_info() {
   );
 }
 
-
 /**
  * Implements hook_modules_enabled().
  */
 function apps_modules_enabled($modules) {
   foreach ($modules as $module_name) {
-    if ($app = apps_app_module_name_load($module_name)) {
+    if ($app = module_invoke($module_name, 'apps_app_info')) {
+      $app['machine_name'] = $module_name;
       apps_app_configure_permissions($app);
     }
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function apps_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'modules_enabled') {
+    // Make apps run last for this just be to careful.
+    $group = $implementations['apps'];
+    unset($implementations['apps']);
+    $implementations['apps'] = $group;
   }
 }
 
