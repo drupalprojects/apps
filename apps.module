@@ -567,7 +567,7 @@ function apps_updater_info() {
 /**
  * Implements hook_modules_enabled().
  */
-function openpublic_modules_enabled($modules) {
+function apps_modules_enabled($modules) {
   foreach ($modules as $module_name) {
     if ($app = apps_app_module_name_load($module_name)) {
       apps_app_configure_permissions($app);
