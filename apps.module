@@ -277,10 +277,11 @@ function apps_app_access($app, $action = NULL) {
 
       case 'configure':
         return (bool)
-          apps_app_callback($app, "configure form") ||
-          apps_app_callback($app, "demo content enabled callback") ||
-          apps_app_callback($app, "status callback") ||
-          !empty($app['permissions']);
+          $app['status'] === APPS_ENABLED && (
+            apps_app_callback($app, "configure form") ||
+            apps_app_callback($app, "demo content enabled callback") ||
+            apps_app_callback($app, "status callback") ||
+            !empty($app['permissions']));
 
       case 'uninstall':
         return $app['disabled'];
