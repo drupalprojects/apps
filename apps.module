@@ -461,7 +461,7 @@ function apps_hook_info() {
  *   If the directory is writeable
  */
 function apps_installer_has_write_access() {
-  return is_writable(drupal_realpath(apps_installer_lib_dir())) && is_writable(drupal_realpath(APPS_INSTALL_PATH));
+  return is_writable(drupal_realpath(apps_installer_lib_dir())) && is_writable(drupal_realpath(variable_get('apps_install_path', APPS_INSTALL_PATH)));
 }
 
 /**

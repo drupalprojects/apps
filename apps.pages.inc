@@ -348,6 +348,13 @@ function apps_settings_form() {
     '#type' => 'checkbox',
     '#default_value' => variable_get('apps_allow_voting', TRUE),
   );
+  $form['apps_install_path'] = array(
+    '#title' => t('Apps Install Path'),
+    '#description' => t('For best practice, you can change the path to sites/all/modules/contrib.'),
+    '#type' => 'textfield',
+    '#default_value' => variable_get('apps_install_path', APPS_INSTALL_PATH),
+  );
+  
   $form = system_settings_form($form);
   $form['#submit'][] = 'apps_settings_form_submit';
   return $form;

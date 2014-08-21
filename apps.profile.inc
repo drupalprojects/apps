@@ -529,7 +529,7 @@ function apps_install_verify() {
 
   // Verify web server write permissions
   $install_permissions = apps_installer_has_write_access();
-  $vars = array('@install_path' => APPS_INSTALL_PATH, '@lib_path' => apps_installer_lib_dir());
+  $vars = array('@install_path' => variable_get('apps_install_path', APPS_INSTALL_PATH), '@lib_path' => apps_installer_lib_dir());
   $form['webserver'] = array(
     '#type' => 'fieldset',
     '#title' => t('Webserver direct install (!status)', array('!status' => $install_permissions ? t('Enabled!') : t('Not enabled'))),
