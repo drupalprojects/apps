@@ -254,8 +254,8 @@ function apps_run_install($filetransfer, $projects) {
   }
 
   $batch = array(
-    'title' => t('Installing updates'),
-    'init_message' => t('Preparing to update your site'),
+    'title' => t('Downloading apps'),
+    'init_message' => t('Preparing to download apps.'),
     'operations' => $operations,
     'finished' => 'apps_update_authorize_update_batch_finished',
     'file' => drupal_get_path('module', 'apps') . '/apps.installer.inc',
