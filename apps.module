@@ -276,7 +276,7 @@ function apps_app_access($app, $action = NULL) {
         return $app['status'] === APPS_ENABLED;
 
       case 'configure':
-        return (bool)
+        return
           $app['status'] === APPS_ENABLED && (
             apps_app_callback($app, "configure form") ||
             apps_app_callback($app, "demo content enabled callback") ||
