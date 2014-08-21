@@ -346,7 +346,7 @@ function apps_settings_form() {
     '#title' => t('Allow Voting'),
     '#description' => t('Allow users who can install apps to also rate them.  Requires that the appserver is running the appserver module.'),
     '#type' => 'checkbox',
-    '#default_value' => variable_get('apps_allow_voting', TRUE),
+    '#default_value' => variable_get('apps_allow_voting', FALSE),
   );
   $form['apps_install_path'] = array(
     '#title' => t('Apps Install Path'),
