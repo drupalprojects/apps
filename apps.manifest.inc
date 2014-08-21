@@ -336,7 +336,7 @@ function apps_retrieve_app_image($app, $url, $title = '', $alt = '') {
     // Get the remote headers.
     $remote = drupal_http_request($url, array('method' => 'HEAD'));
     $remote = $remote->headers;
-    $use_current = strtotime($remote['last-modified']) <= $current->timestamp;
+    $use_current = !empty($remote['last-modified']) && strtotime($remote['last-modified']) <= $current->timestamp;
 
     if ($use_current && !empty($remote['content-length']) && $remote['content-length'] == $current->filesize) {
       $current->path = $current->uri;
