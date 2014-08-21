@@ -73,7 +73,7 @@ function apps_manage_page($server) {
   );
   // find all installed apps
   try {
-    $apps = apps_apps($server['name'], array("installed" => TRUE), TRUE);
+    $apps = apps_apps($server, array("installed" => TRUE), TRUE);
     $element['apps'] = $apps;
   }
   catch (Exception $e) {
