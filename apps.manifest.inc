@@ -348,9 +348,7 @@ function apps_retrieve_app_image($app, $url, $title = '', $alt = '') {
 
   $request = drupal_http_request($url, array(), 'GET');
   if (isset($request->data) && $request->code == 200) {
-    if (!file_exists(drupal_realpath(file_build_uri($dir)))) {
-      drupal_mkdir(file_build_uri($dir), NULL, TRUE);
-    }
+    file_prepare_directory(file_build_uri($dir), FILE_CREATE_DIRECTORY || FILE_MODIFY_PERMISSIONS);
 
     $file = new stdClass();
     $file->mimetype = $request->headers['content-type'];
