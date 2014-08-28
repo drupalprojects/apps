@@ -351,7 +351,7 @@ function apps_retrieve_app_image($app, $url, $title = '', $alt = '') {
     file_prepare_directory(file_build_uri($dir), FILE_CREATE_DIRECTORY || FILE_MODIFY_PERMISSIONS);
 
     $file = new stdClass();
-    $file->mimetype = $request->headers['content-type'];
+    $file->filemime = $request->headers['content-type'];
     $file->uri = file_unmanaged_save_data($request->data, $uri, FILE_EXISTS_REPLACE);
     if ($current) {
       $file->fid = $current->fid;
