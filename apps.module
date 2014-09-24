@@ -76,6 +76,13 @@ function apps_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'apps.pages.inc',
   );
+  $menu["admin/apps/%apps_server/catalog.md"] = array(
+    'title' => "Catelog",
+    'page callback' => 'apps_catalog_page',
+    'page arguments' => array(2),
+    'access arguments' => array('administer apps'),
+    'file' => 'apps.pages.inc',
+  );
 
   // App operations.
   $menu["admin/apps/%apps_app/%"] = array(
@@ -212,6 +219,15 @@ function apps_theme() {
     'apps_update_page' => array(
       'render element' => 'content',
       'template' => 'apps-update-page',
+      'file' => 'apps.theme.inc',
+      'path' => $path,
+    ),
+    'apps_catalog_page' => array(
+      'variables' => array(
+        'server' => NULL,
+        'apps' => array(),
+      ),
+      'template' => 'apps-catalog-page',
       'file' => 'apps.theme.inc',
       'path' => $path,
     ),

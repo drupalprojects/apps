@@ -187,3 +187,26 @@ function apps_preprocess_apps_manage_page(&$vars) {
 function apps_preprocess_apps_update_page(&$vars) {
   drupal_add_css(drupal_get_path('module', 'apps') . '/theme/css/apps.css');
 }
+
+/**
+ * Implements hook_preprocess_apps_update_page().
+ */
+function apps_preprocess_apps_catalog_page(&$vars) {
+  $vars['title'] = $vars['server']['title'];
+  $vars['apps_render'] = array();
+  foreach ($vars['apps'] as $machine_name => $info) {
+    $vars['apps_render'][$info['name']] = array(
+      'description' => check_plain($info['description']),
+      'conflicts' => array(),
+      'name' => check_plain($info['name']),
+    );
+    if ($conflicts = apps_app_find_conflicts($info)) {
+      foreach ($conflicts as $conflict) {
+        if ($conflict['server'] == $vars['server']['name']) {
+          $vars['apps_render'][$info['name']]['conflicts'][] = check_plain($vars['apps'][$conflict['name']]['name']);
+        }
+      }
+    }
+  }
+  ksort($vars['apps_render']);
+}
