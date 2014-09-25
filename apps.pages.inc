@@ -96,7 +96,7 @@ function apps_update_page($server) {
  */
 function apps_catalog_page($server) {
   apps_include('manifest');
-  drupal_add_http_header('text/x-markdown; charset=UTF-8');
+  drupal_add_http_header('Content-Type', 'text/x-markdown');
   $render = array(
     '#theme' => 'apps_catalog_page',
     '#apps' => apps_apps($server, array(), FALSE),
