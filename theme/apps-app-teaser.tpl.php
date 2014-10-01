@@ -12,5 +12,8 @@
     <?php if ($config): ?>
       <div class="app-action"><?php print $config; ?></div>
     <?php endif; ?>
+    <?php if ($update): ?>
+      <div class="app-action"><?php print $update; ?></div>
+    <?php endif; ?>
   </div>
 </div>

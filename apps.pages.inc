@@ -86,9 +86,19 @@ function apps_manage_page($server) {
  * Callback for listing of installed apps that have available updates
  */
 function apps_update_page($server) {
-  return array(
-    '#theme' => 'apps_update_page',
-  );
+  apps_include('manifest');
+  $element = array(
+     '#theme'=> 'apps_update_page',
+   );
+  // find all installed apps
+  try {
+    $apps = apps_apps($server, array("upgradeable" => TRUE), TRUE);
+    $element['apps'] = $apps;
+  }
+  catch (Exception $e) {
+    drupal_set_message(t("There was the following error - @error", array('@error' => $e->getMessage())), 'warning');
+  }
+  return $element;
 }
 
 /**
@@ -259,22 +269,6 @@ function apps_app_install($app) {
 }
 
 /**
- * Centralize the generation of App paths
- *
- * @param $app
- *    The app array
- * @param string $op
- *    The path type
- * @return string
- *    A path to the app operation
- */
-function apps_app_page_path($app, $op = 'details') {
-  if (isset($app['machine_name'])) {
-    return "admin/apps/{$app['server']['name']}/{$app['machine_name']}/$op";
-  }
-}
-
-/**
  * Callback for the enable action
  *
  * Enables the app and got to config page if it exists
@@ -337,6 +331,36 @@ function apps_app_uninstall($app) {
    }
   $next = apps_app_page_path($app);
   drupal_goto($next);
+}
+
+
+/**
+ * Callback for app update.
+ */
+function apps_app_update($app) {
+  // Redownload apps then run any updates.
+  apps_include('installer');
+  require_once DRUPAL_ROOT . '/includes/authorize.inc';
+  $action = arg(5);
+  switch ($action) {
+    case 'updatedb';
+      drupal_set_message(t('Please check for any <a href="@url">updates</a> and run them.', array('@url' => url('update.php'))));
+      unset($_SESSION['apps_install_next']);
+      drupal_goto(apps_app_page_path($app));
+      break;
+    case 'update':
+      $_SESSION['apps_install_next'] = apps_app_page_path($app, 'update/updatedb');
+      return apps_install_downloads();
+    default:
+      // Need to clear update cache or it'll reuse all downloads.
+      apps_clear_update_disk_cache();
+      // Adds an extra path element to avoid an endless loop. If we check for
+      // install at arg(4) we are usually there. So here we add an install at
+      // arg(5) and that will get caught in the case above ^-^
+      $_SESSION['apps_install_next'] = apps_app_page_path($app, 'update/update');
+      apps_download_apps($app);
+      break;
+  }
 }
 
 /**

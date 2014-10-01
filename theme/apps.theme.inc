@@ -23,7 +23,6 @@ function theme_apps_list($vars) {
  * Implements hook_preprocess_apps_app_teaser().
  */
 function apps_preprocess_apps_app_teaser(&$vars) {
-
   apps_include('pages');
   $link = apps_app_page_path($vars['app']);
   $vars['name'] = l($vars['app']['name'], $link);
@@ -55,6 +54,7 @@ function apps_preprocess_apps_app_teaser(&$vars) {
   //action link
   $vars['config'] = apps_app_access($vars['app'], 'configure') ? l(t('Config'), apps_app_page_path($vars['app'], 'configure')) : '';
   $vars['action'] = l(t('Details'), $link);
+  $vars['update'] = apps_app_access($vars['app'], 'update') ? l(t('Update'), apps_app_page_path($vars['app'], 'update')) : '';
 }
 
 /**

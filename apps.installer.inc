@@ -69,7 +69,7 @@ function apps_download_apps_list($app) {
     }
   }
   // Add our core modules download.
-  if (!$app['installed']) {
+  if (!$app['installed'] || !empty($app['upgradeable'])) {
     $downloads[$app['downloadable']]['for'][] = $app['machine_name'];
     $downloads[$app['downloadable']]['type'] = 'app';
   }
@@ -342,4 +342,15 @@ function apps_update_authorize_batch_copy_project($project, $updater_name, $loca
   // This particular operation is now complete, even though the batch might
   // have other operations to perform.
   $context['finished'] = 1;
+}
+
+/**
+ * Delete the update cache directories so clean update is run.
+ */
+function apps_clear_update_disk_cache() {
+  file_unmanaged_delete_recursive(_update_manager_cache_directory(FALSE));
+  file_unmanaged_delete_recursive(_update_manager_extract_directory(FALSE));
+  // Recreate the directories.
+  _update_manager_cache_directory();
+   _update_manager_extract_directory();
 }

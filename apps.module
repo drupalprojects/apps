@@ -137,6 +137,15 @@ function apps_menu() {
     'type' => MENU_LOCAL_ACTION,
     'file' => 'apps.pages.inc',
   );
+  $menu["admin/apps/%apps_app/%/update"] = array(
+    'title' => "Update",
+    'page callback' => 'apps_app_update',
+    'page arguments' => array(2),
+    'access callback' => 'apps_app_access',
+    'access arguments' => array(2, 'update'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'apps.pages.inc',
+  );
   $menu["admin/apps/%apps_app/%/configure"] = array(
     'title' => 'Configure',
     'page callback' => 'apps_app_config_page',
@@ -287,6 +296,9 @@ function apps_app_access($app, $action = NULL) {
         elseif ($action == 'install') {
           return $app['status'] === APPS_INSTALLABLE;
         }
+
+      case 'update':
+        return !empty($app['upgradeable']) || (!empty($_SESSION['apps_install_next']) && $_SESSION['apps_install_next']  == apps_app_page_path($app, 'update/updatedb'));
 
       case 'disable':
         return $app['status'] === APPS_ENABLED;
@@ -555,6 +567,22 @@ function apps_block_view($delta) {
  */
 function apps_include($group) {
   module_load_include("inc", "apps", "apps.$group");
+}
+
+/**
+ * Centralize the generation of App paths
+ *
+ * @param $app
+ *    The app array
+ * @param string $op
+ *    The path type
+ * @return string
+ *    A path to the app operation
+ */
+function apps_app_page_path($app, $op = 'details') {
+  if (isset($app['machine_name'])) {
+    return "admin/apps/{$app['server']['name']}/{$app['machine_name']}/$op";
+  }
 }
 
 /**

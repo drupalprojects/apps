@@ -400,6 +400,7 @@ function apps_manifest($server) {
       $app['enabled'] = $current_app_module && $current_app_module->status;
       $app['incompatible'] = FALSE;
       $app['installed'] = (bool) $current_app_module;
+      $app['upgradeable'] = $app['installed'] && isset($current_app_module->info['version']) && version_compare($current_app_module->info['version'], $app['version'], 'lt');
       $app['dep_installed'] = TRUE;
       $app['disabled'] = $current_app_module && empty($current_app_module->status) && $current_app_module->schema_version > SCHEMA_UNINSTALLED;
       $app['featured'] = isset($manifest['featured app']) && ($machine_name == $manifest['featured app']);
