@@ -19,6 +19,37 @@ function apps_app_title($app) {
 }
 
 /**
+ * Verify's token or presents a confirm form.
+ */
+function apps_display_confirm_form($question, $unique) {
+  // Can't easily pass query args to batch, so allow if install next is set to
+  // current page, as we set that.
+  if ((isset($_SESSION['apps_install_next']) && $_SESSION['apps_install_next']  == $_GET['q'])
+    || (isset($_REQUEST['token']) && drupal_valid_token($_REQUEST['token'], $unique))) {
+    return FALSE;
+  }
+  else {
+    $path = array($_GET['q'], array('query' => array('token' => drupal_get_token($unique))));
+    return drupal_get_form('apps_confirm_form', $question, $path);
+  }
+}
+
+/**
+ * Confirms the user wants to do the action.
+ */
+function apps_confirm_form($form, $form_state, $question, $path) {
+  $form['#redirect_path'] = $path;
+  return confirm_form($form, $question, 'admin/apps', t('This action can be undone.'));
+}
+
+/**
+ * Redirects user to same path but with token.
+ */
+function apps_confirm_form_submit($form, &$form_state) {
+  $form_state['redirect'] = $form['#redirect_path'];
+}
+
+/**
  * Callback for the market page
  *
  * If there is only one server, go directly to it. Otherwise, list 'em.
@@ -251,6 +282,10 @@ function apps_app_details_page($app) {
  * NOTE: it is expected that this page would be called with a drupal desination set
  */
 function apps_app_install($app) {
+  $token_name = 'install-' . $app['machine_name'];
+  if ($confirm_form = apps_display_confirm_form(t('Are you sure you want to install @name?', array('@name' => $app['name'])), $token_name)) {
+    return $confirm_form;
+  }
   apps_include('installer');
   require_once DRUPAL_ROOT . '/includes/authorize.inc';
   $action = arg(5);
@@ -274,6 +309,10 @@ function apps_app_install($app) {
  * Enables the app and got to config page if it exists
  */
 function apps_app_enable($app) {
+  $token_name = 'enable-' . $app['machine_name'];
+  if ($confirm_form = apps_display_confirm_form(t('Are you sure you want to enable @name?', array('@name' => $app['name'])), $token_name)) {
+    return $confirm_form;
+  }
   $next = apps_app_page_path($app, 'configure');
   $success = module_enable(array($app['machine_name']), TRUE);
   if ($success) {
@@ -297,6 +336,10 @@ function apps_app_enable($app) {
  * Callback for app disable
  */
 function apps_app_disable($app) {
+  $token_name = 'disable-' . $app['machine_name'];
+  if ($confirm_form = apps_display_confirm_form(t('Are you sure you want to disable @name?', array('@name' => $app['name'])), $token_name)) {
+    return $confirm_form;
+  }
   // Force the user to disable demo content before disabling the app
   if (($is_cb = apps_app_callback($app, "demo content enabled callback")) &&
     $is_cb($app)) {
@@ -316,6 +359,10 @@ function apps_app_disable($app) {
  * Callback for app uninstall
  */
 function apps_app_uninstall($app) {
+  $token_name = 'uninstall-' . $app['machine_name'];
+  if ($confirm_form = apps_display_confirm_form(t('Are you sure you want to uninstall @name?', array('@name' => $app['name'])), $token_name)) {
+    return $confirm_form;
+  }
   require_once DRUPAL_ROOT . '/includes/install.inc';
   $uninstall[] = $app['machine_name'];
   if (isset($app['demo content module']) && $app['demo content module']) {
@@ -338,6 +385,10 @@ function apps_app_uninstall($app) {
  * Callback for app update.
  */
 function apps_app_update($app) {
+  $token_name = 'update-' . $app['machine_name'];
+  if ($confirm_form = apps_display_confirm_form(t('Are you sure you want to update @name?', array('@name' => $app['name'])), $token_name)) {
+    return $confirm_form;
+  }
   // Redownload apps then run any updates.
   apps_include('installer');
   require_once DRUPAL_ROOT . '/includes/authorize.inc';
