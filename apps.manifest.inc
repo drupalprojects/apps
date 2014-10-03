@@ -38,11 +38,11 @@ function apps_server_local($server) {
       }
       if (isset($manifest['screenshots'])) {
         foreach ($manifest['screenshots'] as $id => $image) {
-          $manifest['screenshots'][$id] = url($app_path . '/' . $image);
+          $manifest['screenshots'][$id] = $app_path . '/' . $image;
         }
       }
       if (isset($manifest['logo'])) {
-        $manifest['logo'] = url($app_path . '/' . $manifest['logo']);
+        $manifest['logo'] = $app_path . '/' . $manifest['logo'];
       }
       $apps[$module] = $manifest;
     }
@@ -297,7 +297,7 @@ function apps_request_manifest_image_process(&$manifest) {
  * @param string $app
  *   The app machine name
  * @param string $url
- *   The url of the image
+ *   The url or local path of the image
  * @param string $title
  *   The title of the image
  * @param string $alt
@@ -310,7 +310,7 @@ function apps_retrieve_app_image($app, $url, $title = '', $alt = '') {
   // Allow for local files.
   $check = parse_url($url);
   if (!$check || !isset($check['host']) || !$check['host']) {
-    $url = url($url, array('absolute' => TRUE));
+    $url = file_create_url($url);
   }
 
   $url_parts = explode("/", parse_url($url, PHP_URL_PATH));
