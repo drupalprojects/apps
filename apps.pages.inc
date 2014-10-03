@@ -294,6 +294,8 @@ function apps_app_install($app) {
       $_SESSION['apps_install_next'] = apps_app_page_path($app, 'enable');
       return apps_install_downloads();
     default:
+      // Clear cache so downloads new files.
+      apps_clear_update_disk_cache();
       // Adds an extra path element to avoid an endless loop. If we check for
       // install at arg(4) we are usually there. So here we add an install at
       // arg(5) and that will get caught in the case above ^-^

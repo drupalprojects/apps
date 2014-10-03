@@ -410,8 +410,14 @@ function apps_manifest($server) {
       $app['conflicts'] = isset($app['conflicts']) ? $app['conflicts'] : array();
       // Add info to dependencies
       foreach ($app['dependencies'] as $name_version => $downloadable) {
-        //Parse dep versions
+        // Parse dep versions
         $version = drupal_parse_dependency($name_version);
+        // While the version compdability string is stored in $name_version
+        // the current version may be in downloadables. Ignore 1.x type versions.
+        $version['version'] = NULL;
+        if ($space_pos = strpos($downloadable, ' ') && substr($downloadable, -1) != 'x') {
+          $version['version'] = substr($downloadable, $space_pos);
+        }
         $name = $version['name'];
 
         //check status of modules
@@ -422,14 +428,14 @@ function apps_manifest($server) {
         $status = $incompatible ? APPS_INCOMPATIBLE : (!$installed ? APPS_INSTALLABLE : ($enabled ? APPS_ENABLED : APPS_DISABLED));
 
         if ($status == APPS_INCOMPATIBLE) {
-          //if any one module is incompatible then the app is incompatible
+          // If any one module is incompatible then the app is incompatible
           $app['incompatible'] = TRUE;
         }
         if ($status == APPS_INSTALLABLE) {
-          //if any one module is installable then we are not installed yet
+          // If any one module is installable then we are not installed yet
           $app['dep_installed'] = FALSE;
         }
-        //rebuild dep with new data
+        // Rebuild dep with new data
         $info = array(
           'downloadable' => $downloadable,
           'version' => $version,
@@ -445,9 +451,15 @@ function apps_manifest($server) {
         $profile = variable_get('install_profile', 'standard');
         $profile_path = drupal_get_path('profile', $profile);
         foreach ($app['libraries'] as $name_version => $downloadable) {
+          // While the version compdability string is stored in $name_version
+          // the current version may be in downloadables. Ignore 1.x type versions.
+          $current_version = NULL;
+          if ($space_pos = strpos($downloadable, ' ') && substr($downloadable, -1) != 'x') {
+            $current_version = substr($downloadable, $space_pos);
+          }
           $info = array(
             'downloadable' => $downloadable,
-            'version' => array('name' => $name_version),
+            'version' => array('name' => $name_version, 'version' => $current_version),
             'status' => APPS_INSTALLABLE,
             'incompatible' => 0,
             'enabled' => 0,
