@@ -36,6 +36,7 @@ function apps_download_apps_batch($apps) {
           $download['name'],
           $download['url'],
           $download['type'],
+          $download['version'],
           $app,
         ),
       );
@@ -64,7 +65,7 @@ function apps_download_apps_list($app) {
         if (!$dep['installed'] || $update) {
           if ($dep['installed'] && $update && !empty($dep['version']['version'])) {
             $info_file_location = $download_type == 'module' ? drupal_get_path('module', $dep['version']['name']) : 'sites/all/libraries/' . $dep['version']['name'];
-            if ($info = drupal_parse_info_file($info_file_location)) {
+            if ($info = drupal_parse_info_file($info_file_location . '/' . APPS_APP_INFO)) {
               // if don't have current version of version the same, skip this download.
               if (empty($info['version']) || $dep['version']['version'] == $info['version']) {
                 continue;
@@ -73,7 +74,7 @@ function apps_download_apps_list($app) {
           }
           $downloads[$dep['downloadable']]['for'][] = $dep['version']['name'];
           $downloads[$dep['downloadable']]['type'] = $download_type;
-          $downloads[$dep['downloadable']]['version'] = isset($dep['version']['version']) ? $dep['version']['version'] : NULL;
+          $downloads[$dep['downloadable']]['version'] = isset($dep['version']['version']) ? $dep['version']['version'] : $app['version'];
         }
       }
     }
@@ -82,6 +83,7 @@ function apps_download_apps_list($app) {
   if (!$app['installed'] || !empty($app['upgradeable'])) {
     $downloads[$app['downloadable']]['for'][] = $app['machine_name'];
     $downloads[$app['downloadable']]['type'] = 'app';
+    $downloads[$app['downloadable']]['version'] = $app['version'];
   }
   // Foreach download find the URL.
   foreach ($downloads as $key => $download) {
@@ -112,7 +114,7 @@ function apps_download_batch_finished($success, $results) {
  * batch set the file param is for both the operations as well as the other
  * callbacks.
  */
-function apps_download_batch($project, $url, $type, $app, &$context) {
+function apps_download_batch($project, $url, $type, $version, $app, &$context) {
   module_load_include("inc", "update", "update.manager");
 
   // This is here to show the user that we are in the process of downloading.
@@ -153,15 +155,12 @@ function apps_download_batch($project, $url, $type, $app, &$context) {
   // Update/create info file with download information for future updating.
   if (is_dir("$extract_directory/$project")) {
     // Need to make version is set.
-    $add = array('', '; Information added by apps module.');
-    if ($info = drupal_parse_info_file("$extract_directory/$project/$project.info")) {
-      if (!isset($info['version'])) {
-        $add[] = 'version=' . (!empty($app['version']) ? $app['version'] : 'unknown');
-      }
-    }
+    $add = array('; Information created by apps module.', '');
+    $add[] = 'version = ' . $version;
     $add[] = 'source_app = ' . $app['machine_name'];
     $add[] = 'download_time = ' . time();
-    file_put_contents("$extract_directory/$project/$project.info", implode("\n", $add), FILE_APPEND);
+    $add[] = '';
+    file_put_contents("$extract_directory/$project/" . APPS_APP_INFO, implode("\n", $add), FILE_APPEND);
   }
 
   // Verify it.

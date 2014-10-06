@@ -8,6 +8,9 @@ define("APPSERVER_BASEPATH", 'admin/apps');
 define("APPSERVER_BASEPATH_DEPTH", 1);
 define("APPS_INSTALL_PATH", 'sites/all/modules');
 
+// File name for app info stored in downloaded projects.
+define('APPS_APP_INFO', 'app.info');
+
 define("APPS_ENABLED", 1);
 define("APPS_DISABLED", 0);
 define("APPS_INCOMPATIBLE", -1);

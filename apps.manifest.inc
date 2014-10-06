@@ -397,10 +397,12 @@ function apps_manifest($server) {
     $apps = array();
     foreach ($manifest['apps'] as $machine_name => $app) {
       $current_app_module = isset($modules[$machine_name]) ? $modules[$machine_name] : FALSE;
+      $app_info = isset($modules[$machine_name]) ? drupal_parse_info_file(drupal_get_path('module', $machine_name) . '/' . APPS_APP_INFO) : array();
       $app['enabled'] = $current_app_module && $current_app_module->status;
       $app['incompatible'] = FALSE;
       $app['installed'] = (bool) $current_app_module;
-      $app['upgradeable'] = $app['installed'] && isset($current_app_module->info['version']) && version_compare($current_app_module->info['version'], $app['version'], 'lt');
+      $app['installed_version'] = isset($app_info['version']) ? $app_info['version'] : (isset($current_app_module->info['version']) ? $current_app_module->info['version'] : NULL);
+      $app['upgradeable'] = $app['installed'] && $app['installed_version'] && version_compare($app['installed_version'], $app['version'], 'lt');
       $app['dep_installed'] = TRUE;
       $app['disabled'] = $current_app_module && empty($current_app_module->status) && $current_app_module->schema_version > SCHEMA_UNINSTALLED;
       $app['featured'] = isset($manifest['featured app']) && ($machine_name == $manifest['featured app']);
@@ -415,8 +417,8 @@ function apps_manifest($server) {
         // While the version compdability string is stored in $name_version
         // the current version may be in downloadables. Ignore 1.x type versions.
         $version['version'] = NULL;
-        if ($space_pos = strpos($downloadable, ' ') && substr($downloadable, -1) != 'x') {
-          $version['version'] = substr($downloadable, $space_pos);
+        if (($space_pos = strpos($downloadable, ' ')) && substr($downloadable, -1) != 'x') {
+          $version['version'] = trim(substr($downloadable, $space_pos));
         }
         $name = $version['name'];
 
@@ -454,8 +456,8 @@ function apps_manifest($server) {
           // While the version compdability string is stored in $name_version
           // the current version may be in downloadables. Ignore 1.x type versions.
           $current_version = NULL;
-          if ($space_pos = strpos($downloadable, ' ') && substr($downloadable, -1) != 'x') {
-            $current_version = substr($downloadable, $space_pos);
+          if (($space_pos = strpos($downloadable, ' ')) && substr($downloadable, -1) != 'x') {
+            $current_version = trim(substr($downloadable, $space_pos));
           }
           $info = array(
             'downloadable' => $downloadable,
