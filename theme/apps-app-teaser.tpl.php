@@ -1,4 +1,4 @@
-<div class="app-teaser-wrapper clearfix">
+<div class="app-teaser-wrapper clearfix <?php print $classes; ?>">
   <?php if ($logo): ?>
     <div class="app-logo">
       <?php print $logo ?>

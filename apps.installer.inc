@@ -160,7 +160,7 @@ function apps_download_batch($project, $url, $type, $version, $app, &$context) {
     $add[] = 'source_app = ' . $app['machine_name'];
     $add[] = 'download_time = ' . time();
     $add[] = '';
-    file_put_contents("$extract_directory/$project/" . APPS_APP_INFO, implode("\n", $add), FILE_APPEND);
+    file_put_contents("$extract_directory/$project/" . APPS_APP_INFO, implode("\n", $add));
   }
 
   // Verify it.

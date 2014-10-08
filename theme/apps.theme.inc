@@ -55,6 +55,10 @@ function apps_preprocess_apps_app_teaser(&$vars) {
   $vars['config'] = apps_app_access($vars['app'], 'configure') ? l(t('Config'), apps_app_page_path($vars['app'], 'configure')) : '';
   $vars['action'] = l(t('Details'), $link);
   $vars['update'] = apps_app_access($vars['app'], 'update') ? l(t('Update'), apps_app_page_path($vars['app'], 'update')) : '';
+
+  if ($vars['app']['installed_version'] && $vars['app']['version'] != $vars['app']['installed_version']) {
+    $vars['classes_array'][] = ' apps-update-needed-teaser';
+  }
 }
 
 /**
@@ -87,6 +91,9 @@ function apps_preprocess_apps_app_page(&$vars) {
   $vars['name'] = $vars['app']['name'];
   $vars['author'] = l($vars['app']['author'], $vars['app']['author_url']);
   $vars['version'] = $vars['app']['version'];
+  if ($vars['app']['installed_version'] && $vars['app']['version'] != $vars['app']['installed_version']) {
+    $vars['version'] .= ' <span class="apps-update-needed">' . t('Installed: @installed_version', array('@installed_version' => $vars['app']['installed_version'])) . '</span>';
+  }
 
   $conflicts_enabled = array();
   if ($conflicts = apps_app_find_conflicts($vars['app'])) {

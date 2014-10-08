@@ -319,3 +319,12 @@ body.tao #apps-list ul li {
 #apps-voting-error {
   clear:both;
 }
+
+.apps-update-needed {
+  color: #FF0000;
+}
+
+.apps-update-needed-teaser {
+  color:#965;
+  background-color:#ffe4e0;
+}
