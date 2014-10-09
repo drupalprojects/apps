@@ -104,12 +104,12 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
 
   drupal_set_title(apps_profile_get_server_name($_SESSION['apps_server']));
   $form['actions'] = array('#type' => 'actions', '#weight' => 3);
-  foreach ($_SESSION['apps_manifest'] as $name => $app) {
-    if ($name != '#theme') {
-      $options[$name] = '<strong>' . $app['name'] . '</strong>';
-      if (isset($app['description'])) {
-        $options[$name] .= '<br>' . $app['description'];
-      }
+  $apps_manifest = $_SESSION['apps_manifest'];
+  unset($apps_manifest['#theme']);
+  foreach ($apps_manifest as $name => $app) {
+    $options[$name] = '<strong>' . $app['name'] . '</strong>';
+    if (isset($app['description'])) {
+      $options[$name] .= '<br>' . $app['description'];
     }
   }
   $form = array();
@@ -129,6 +129,14 @@ function apps_profile_apps_select_form($form, $form_state, &$install_state) {
     '#default_value' => $_SESSION['apps_server']['default apps'],
     '#options' => $options,
   );
+  // This should be fine to run twice
+  foreach ($apps_manifest as $name => $app) {
+    if (!empty($app['parent_apps'])) {
+      foreach ($app['parent_apps'] as $parent_app) {
+        $form['apps_fieldset']['apps'][$name]['#states']['visible'][':input[name="apps[' . $parent_app . ']"]'] = array('checked' => TRUE);
+      }
+    }
+  }
 
   $form['default_content_fieldset'] = array(
     '#type' => 'fieldset',
@@ -182,6 +190,12 @@ function apps_profile_apps_select_form_validate($form, &$form_state) {
             $names[] = $_SESSION['apps_manifest'][$conflict]['name'] . ' (' . $conflict . ')';
           }
           form_set_error('apps', t('Conflict found with @app (@machine), not compatible with @apps', array('@app' => $app['name'], '@apps' => implode(', ', $names), '@machine' => $app_name)));
+        }
+      }
+      // Don't enable any apps who's parent apps aren't being enabled.
+      if (!empty($app['parent_apps'])) {
+        if (array_diff($app['parent_apps'], $apps)) {
+          unset($form_state['values']['apps'][$app_name]);
         }
       }
     }

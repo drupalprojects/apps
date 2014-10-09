@@ -47,6 +47,13 @@ function apps_server_local($server) {
       $apps[$module] = $manifest;
     }
   }
+  // Add a parent apps key for any apps this app depends on.
+  foreach ($apps as $module => $info) {
+    $apps[$module]['parent_apps'] = isset($apps[$module]['parent_apps']) ? $apps[$module]['parent_apps'] : array();
+    if (!empty($modules[$module]->info['dependencies']) && ($parent_apps = array_intersect($modules[$module]->info['dependencies'], array_keys($apps)))) {
+      $apps[$module]['parent_apps'] = array_merge($apps[$module]['parent_apps'], $parent_apps);
+    }
+  }
   return $apps;
 }
 
@@ -503,8 +510,12 @@ function apps_add_app_info(&$apps) {
     $info_defaults = array(
       'configure form' => $app['machine_name'] . "_apps_app_configure_form",
       'demo content description' => "Enabling the demo content will add content to the site that can help to understand how the app functions.  When it is disabled all of the demo content will be removed.",
+      'parent_apps' => array(),
     );
     $apps[$id] += $info_defaults;
+    if (!empty($app['dependencies']) && ($parent_apps = array_intersect_key($app['dependencies'], $apps))) {
+      $apps[$id]['parent_apps'] = array_merge($apps[$id]['parent_apps'], $parent_apps);
+    }
 
     // Set demo content callbacks if demo content module is set
     if (isset($apps[$id]['demo content module'])) {

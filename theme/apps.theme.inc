@@ -148,6 +148,17 @@ function apps_preprocess_apps_app_page(&$vars) {
     $vars['rating_caption'] = t('Average rating for this version:');
     $vars['rating'] = theme('apps_voting_widget', $vars['app']);
   }
+
+  $vars['parent_apps'] = array();
+  $vars['parent_apps_title'] = t('Depends on');
+  if (!empty($vars['app']['parent_apps'])) {
+    $apps = apps_apps($vars['app']['server']);
+    foreach ($vars['app']['parent_apps'] as $parent_app) {
+      if (!empty($apps[$parent_app])) {
+        $vars['parent_apps'][] = l($apps[$parent_app]['name'], apps_app_page_path($apps[$parent_app]));
+      }
+    }
+  }
 }
 
 /**
