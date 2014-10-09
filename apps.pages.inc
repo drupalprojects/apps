@@ -445,7 +445,19 @@ function apps_settings_form() {
     '#type' => 'textfield',
     '#default_value' => variable_get('apps_install_path', APPS_INSTALL_PATH),
   );
-  
+  $form['apps_grouping_mode'] = array(
+    '#title' => t('Allow Apps Grouping'),
+    '#description' => t('Allow grouping of Apps according to packages (as defined in app information via "package" key.)'),
+    '#type' => 'checkbox',
+    '#default_value'=> variable_get('apps_grouping_mode', FALSE),
+  );
+  $form['apps_grouping_vertical'] = array(
+    '#title' => t('Use vertical tabs for Apps Grouping'),
+    '#description' => t('Put the groupings into vertical tabs instead of collapsible fieldsets.'),
+    '#type' => 'checkbox',
+    '#default_value'=> variable_get('apps_grouping_vertical', TRUE),
+  );
+
   $form = system_settings_form($form);
   $form['#submit'][] = 'apps_settings_form_submit';
   return $form;

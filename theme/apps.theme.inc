@@ -9,13 +9,60 @@
  * Themes a list of apps.
  */
 function theme_apps_list($vars) {
-  $items = array();
-  foreach ($vars['apps'] as $id => $app) {
-    if (!preg_match("/^#/", $id)) {
-      $items[] = drupal_render($app);
+  // Check if Apps grouping mode is enabled.
+  if (variable_get('apps_grouping_mode', FALSE)) {
+    $packages = array();
+    $other = array();
+    foreach (element_children($vars['apps']) as $app_name) {
+      $app = $vars['apps'][$app_name];
+      if (!empty($app['package'])) {
+        foreach (explode(',', $app['package']) as $package) {
+          $packages[trim($package)][$app_name] = $app['name'];
+        }
+      }
+      else {
+        $other[$app_name] = $app['name'];
+      }
     }
+    ksort($packages);
+    if (!empty($other)) {
+      $packages[t('Other')] = $other;
+    }
+    // Until issue @https://drupal.org/node/1099132 is fixed, we need to
+    // manually load js file and add classes to element
+    $render['app_groups']['#attached']['js'][] = "misc/collapse.js";
+    $render['app_groups']['#attached']['js'][] = "misc/form.js";
+    if (variable_get('apps_grouping_vertical', TRUE)) {
+      $render['app_groups'] = array(
+        '#type' => 'vertical_tabs',
+        '#weight' => 99,
+      );
+    }
+    foreach ($packages as $key => $apps) {
+      $items = array();
+      foreach ($apps as $id => $app) {
+        $vars['apps'][$id]['#printed'] = FALSE;
+        $items[] = drupal_render($vars['apps'][$id]);
+      }
+      $render['app_groups'][$key] = array(
+        '#type' => 'fieldset',
+        '#title' => $key,
+        '#group' => 'app_groups',
+        '#children' => theme('item_list', array('items' => $items)),
+        '#attributes' => array('class' => array('collapsible')),
+      );
+    }
+    return drupal_render($render);
   }
-  return theme('item_list', array('items' => $items));
+  else {
+    $items = array();
+    foreach ($vars['apps'] as $id => $app) {
+      if (!preg_match("/^#/", $id)) {
+        $items[] = drupal_render($app);
+      }
+    }
+    return theme('item_list', array('items' => $items));
+  }
 }
 
 
