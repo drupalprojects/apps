@@ -242,9 +242,15 @@ function apps_request_manifest($server) {
   elseif ($remote_manifest = json_decode($request->data, TRUE)) {
     // Translate index to machine name.
     foreach ($remote_manifest['apps'] as $index => $app) {
+      // App server has a bug where it puts the server base url for blank logos.
+      if (strpos($server['manifest'], $app['logo']) === 0) {
+        unset($app['logo']);
+      }
       // If it is already a local app, note the remote version.
       if (array_key_exists($app['machine_name'], $manifest['apps'])) {
         $manifest['apps'][$app['machine_name']]['remote manifest'] = $app;
+        // Override app info with remote information.
+        $manifest['apps'][$app['machine_name']] = $app + $manifest['apps'][$app['machine_name']];
       }
       // Else translate index to machine name.
       else {

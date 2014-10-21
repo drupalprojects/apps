@@ -337,16 +337,16 @@ function apps_update_authorize_batch_copy_project($project, $updater_name, $loca
 
   try {
     $args = array();
-    if ($updater_name == 'ModuleUpdater') {
-      $args = array(
-        'install_dir' => DRUPAL_ROOT . '/' . variable_get('apps_install_path', APPS_INSTALL_PATH),
-      );
-    }
     if ($updater->isInstalled()) {
       // This is an update.
       $tasks = $updater->update($filetransfer, $args);
     }
     else {
+      if ($updater_name == 'ModuleUpdater') {
+        $args = array(
+          'install_dir' => DRUPAL_ROOT . '/' . variable_get('apps_install_path', APPS_INSTALL_PATH),
+        );
+      }
       $tasks = $updater->install($filetransfer, $args);
     }
   }

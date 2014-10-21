@@ -159,7 +159,17 @@ function apps_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'apps.pages.inc',
   );
-
+  if (module_exists('devel')) {
+    $menu['admin/apps/%apps_app/%/devel'] = array(
+      'title' => 'Devel',
+      'page callback' => 'apps_devel_load_array',
+      'page arguments' => array('app', 2),
+      'access arguments' => array('access devel information'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'apps.pages.inc',
+      'weight' => 300,
+    );
+  }
   // Config Screens.
   $menu['admin/config/system/apps'] = array(
     'title' => 'Apps Configuration',

@@ -397,7 +397,7 @@ function apps_app_update($app) {
   $action = arg(5);
   switch ($action) {
     case 'updatedb';
-      drupal_set_message(t('Please check for any <a href="@url">updates</a> and run them.', array('@url' => url('update.php'))));
+      drupal_set_message($_SESSION['authorize_results']['page_message']['message'], $_SESSION['authorize_results']['page_message']['type']);
       unset($_SESSION['apps_install_next']);
       drupal_goto(apps_app_page_path($app));
       break;
@@ -543,4 +543,13 @@ function apps_app_status_report($items, $header = NULL) {
     '#header' => $header,
     '#rows' => $rows,
   );
+}
+
+/**
+ * Provide development information.
+ */
+function apps_devel_load_array($type, $array) {
+  module_load_include('pages.inc', 'devel');
+  // Wth krumo, array is fine, but devel_print_object needs an object.
+  return devel_load_object($type, has_krumo() ? $array : (object) $array);
 }
