@@ -322,8 +322,15 @@ function apps_request_manifest_image_process(&$manifest) {
 function apps_retrieve_app_image($app, $url, $title = '', $alt = '') {
   // Allow for local files.
   $check = parse_url($url);
+  $is_local = FALSE;
   if (!$check || !isset($check['host']) || !$check['host']) {
+    $old_url = $url;
+    // Quick check that file exists
+    if (!file_exists($old_url)) {
+      return FALSE;
+    }
     $url = file_create_url($url);
+    $is_local = TRUE;
   }
 
   $url_parts = explode("/", parse_url($url, PHP_URL_PATH));
@@ -346,12 +353,18 @@ function apps_retrieve_app_image($app, $url, $title = '', $alt = '') {
   // Check to see if the remote file is newer than the one that.
   // We have and that the one we have still exists.
   if ($current && file_exists($current->uri)) {
-    // Get the remote headers.
-    $remote = drupal_http_request($url, array('method' => 'HEAD'));
-    $remote = $remote->headers;
-    $use_current = !empty($remote['last-modified']) && strtotime($remote['last-modified']) <= $current->timestamp;
+    if ($is_local) {
+      $use_current = filemtime($old_url) <= $current->timestamp && $current->filesize == filesize($old_url);
+    }
+    else {
+      // Get the remote headers.
+      $remote = drupal_http_request($url, array('method' => 'HEAD'));
+      $remote = $remote->headers;
+      $use_current = !empty($remote['last-modified']) && strtotime($remote['last-modified']) <= $current->timestamp
+        && !empty($remote['content-length']) && $remote['content-length'] == $current->filesize;
+    }
 
-    if ($use_current && !empty($remote['content-length']) && $remote['content-length'] == $current->filesize) {
+    if ($use_current) {
       $current->path = $current->uri;
       $current->title = !empty($title) ? $title : '';
       $current->alt = !empty($alt) ? $alt : $title;
@@ -378,6 +391,7 @@ function apps_retrieve_app_image($app, $url, $title = '', $alt = '') {
     $file->path = $file->uri;
     return (array) $file;
   }
+  return FALSE;
 }
 
 /**
