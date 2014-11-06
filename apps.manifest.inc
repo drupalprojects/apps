@@ -172,7 +172,7 @@ function apps_apps_add_theme(&$apps) {
     // Add teaser theme,
     $apps[$id]['#theme'] = 'apps_app_teaser';
     // Add style name for image_style theming.
-    if ($apps[$id]['logo']) {
+    if (!empty($apps[$id]['logo'])) {
       $apps[$id]['logo']['style_name'] = 'apps_logo';
     }
   }
@@ -216,7 +216,6 @@ function apps_request_manifest($server) {
   $local_apps = apps_server_local($server);
   $manifest = $server;
   $manifest['apps'] = $local_apps;
-  apps_request_manifest_image_process($manifest);
 
   // If there is no remote server, or we're in offline mode, stop here.
   if (!$server['manifest'] || variable_get('apps_offline_mode', FALSE)) {
@@ -259,7 +258,6 @@ function apps_request_manifest($server) {
       }
       unset($remote_manifest['apps'][$index]);
     }
-    apps_request_manifest_image_process($remote_manifest);
     $manifest['apps'] = array_merge($remote_manifest['apps'], $manifest['apps']);
     cache_set("apps_manifest_{$server['name']}", $manifest, 'cache', REQUEST_TIME + 60 + 30);
   }
@@ -267,6 +265,9 @@ function apps_request_manifest($server) {
     $msg = t("Manifest JSON from @server not parsable", array('@server' => $server['title']));
     watchdog("apps", $msg);
     drupal_set_message($msg, 'warning');
+  }
+  if ($manifest) {
+    apps_request_manifest_image_process($manifest);
   }
 
   return $manifest;
