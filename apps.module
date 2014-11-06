@@ -530,7 +530,7 @@ function apps_installer_has_write_access() {
   if (!is_dir($install_location) && !drupal_mkdir($install_location, NULL, TRUE)) {
     return FALSE;
   }
-  return is_writable(apps_installer_lib_dir()) && !is_writable($install_location);
+  return is_writable(apps_installer_lib_dir()) && is_writable($install_location);
 }
 
 /**
