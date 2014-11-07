@@ -219,6 +219,7 @@ function apps_request_manifest($server) {
 
   // If there is no remote server, or we're in offline mode, stop here.
   if (!$server['manifest'] || variable_get('apps_offline_mode', FALSE)) {
+    apps_request_manifest_image_process($manifest);
     return $manifest;
   }
 
@@ -259,16 +260,14 @@ function apps_request_manifest($server) {
       unset($remote_manifest['apps'][$index]);
     }
     $manifest['apps'] = array_merge($remote_manifest['apps'], $manifest['apps']);
-    cache_set("apps_manifest_{$server['name']}", $manifest, 'cache', REQUEST_TIME + 60 + 30);
   }
   else {
     $msg = t("Manifest JSON from @server not parsable", array('@server' => $server['title']));
     watchdog("apps", $msg);
     drupal_set_message($msg, 'warning');
   }
-  if ($manifest) {
-    apps_request_manifest_image_process($manifest);
-  }
+  apps_request_manifest_image_process($manifest);
+  cache_set("apps_manifest_{$server['name']}", $manifest, 'cache', REQUEST_TIME + 60 + 30);
 
   return $manifest;
 }
